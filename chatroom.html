@@ -1,0 +1,95 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>對話記錄</title>
+    <link rel="stylesheet" href="assets/js/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/reset.css">
+    <link rel="stylesheet" href="assets/css/custom.css">
+</head>
+<body> -->
+<header class="chatroom-header">
+    <!-- 上方選單 -->
+    <div class="top-menu clearfix">
+        <div class="chatroom-back icon-arrow"></div>
+        <div class="chatroom-title">對話紀錄</div>
+        <div class="chatroom-close icon-close"></div>
+    </div>
+</header>
+<div class="chatroom-page">
+    <div class="dialogue-wrap">
+        <ul>
+            <!-- 對話內容 -->
+        </ul>
+    </div>
+</div>
+<div class="input-box-wrap">
+    <div class="input-box">
+        <input type="text" class="respond" placeholder="請在此輸入回應">
+        <button type="button" class="icon-enter" data-id="enterBtn"></button>
+    </div>
+</div>
+
+</body>
+<!-- <script src="assets/js/jquery-3.2.1.min.js"></script>
+<script src="assets/js/jquery.touchwipe.js"></script>
+<script src="assets/js/bootstrap/js/bootstrap.min.js"></script>
+<script src="assets/js/global.js"></script>
+<script src="assets/js/js.js"></script> -->
+<script>
+var pageChange_chatroom_con = function () {
+    var $this = this;
+    this.add_goPage = function (page) {
+        $.post(page + '.html', {}, function (pg) {
+            $('.page').html(pg);
+        });
+    }
+    this.init = function () {
+        $('.chatroom-back,.chatroom-close').on('click',function(){
+            page = 'meeting_con';
+            $this.add_goPage(page);
+        });
+    }
+    $this.init();
+}
+var pg_chg_cr = new pageChange_chatroom_con();
+
+var chatroomFn = function(){
+    var $this = this;
+
+    this.dialogueList = function(){
+        var html_li = 
+            '<li>\
+                <div class="dialogue-top clearfix">\
+                    <p class="dialogue-name">'+ chatroomText.name +'</p>\
+                    <p class="dialogue-day">'+ chatroomText.day +'</p>\
+                    <p class="dialogue-time">'+ chatroomText.time +'</p>\
+                </div>\
+                <div class="dialogue-btm">'+ chatroomText.text +'</div>\
+            </li>';
+        $('.dialogue-wrap ul').append(html_li);
+    }
+    this.re_size = function(){
+        var $crPage = $('.chatroom-page'),
+            $height = $(window).height(),
+            $header = Math.ceil($('.top-menu').outerHeight()),
+            $inputBox = Math.ceil($('.input-box-wrap').outerHeight()),
+            pageHeight = Math.ceil( $height - $header - $inputBox + 7);
+        $crPage.css({'height': pageHeight});
+    }
+    this.init = function(){
+        $this.re_size();
+        $this.dialogueList();
+
+        $(window).resize(function(){
+            $this.re_size();
+        });
+    }
+    $this.init();
+}
+var Chatroom = new chatroomFn();
+</script>
+<!-- </html> -->

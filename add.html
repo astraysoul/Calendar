@@ -1,0 +1,1101 @@
+<header class="add-header">
+    <!-- 上方選單 -->
+    <div class="top-menu clearfix">
+        <div class="add-back icon-arrow" onclick=""></div>
+        <div class="add-title">新增行程</div>
+    </div>
+</header>
+<div class="add-page">
+    <!-- 上方預定 & 置頂按鈕 -->
+    <div class="addTop-chk">
+        <input type="checkbox" id="allday" class="all-day">
+        <label for="allday">全天預定</label>
+        <input type="checkbox" id="totop" class="to-top">
+        <label for="totop">需置頂</label>
+    </div>
+
+    <!-- 預定標題input -->
+    <input type="text" class="ord-title" value="" placeholder="請輸入您的預定標題">
+
+    <!-- 起始時間 & 結束時間 -->
+    <div class="star-end">
+        <ul>
+            <li class="star-box">
+                <form action="">
+                    <input type="datetime-local" name="datetime" id="s-datetime">
+                    <div class="star-time-text">起</div>
+                </form>
+            </li>
+            <li>
+                <span class="icon-goto"></span>
+            </li>
+            <li class="end-box">
+                <form action="">
+                    <input type="datetime-local" name="datetime" id="e-datetime">
+                    <div class="end-time-text">迄</div>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 行程分類 -->
+    <div class="trip-classify-box">
+        <div class="add-subtitle clearfix">
+            <div>
+                <span class="icon-sort"></span>
+                <p class="title">行程分類</p>
+            </div>
+            <button type="button" class="icon-modify-2" onclick=""></button>
+        </div>
+        <div class="add-list">
+            <ul class="clearfix"></ul>
+        </div>
+    </div>
+    <!-- 提醒 -->
+    <div class="remind-box">
+        <div class="add-subtitle clearfix">
+            <div>
+                <span class="icon-remind-1"></span>
+                <p class="title">提醒</p>
+            </div>
+            <button type="button" class="icon-modify-2" onclick=""></button>
+        </div>
+        <div class="add-list">
+            <ul class="clearfix"></ul>
+        </div>
+    </div>
+    <!-- 重複 -->
+    <div class="repeat-box">
+        <div class="add-subtitle clearfix">
+            <div>
+                <span class="icon-repeat"></span>
+                <p class="title">重複</p>
+            </div>
+            <button type="button" class="icon-modify-2"></button>
+        </div>
+        <div class="add-list">
+            <ul class="clearfix"></ul>
+            <div class="repeat-stop">
+                <span class="rp-text">請選擇重覆結束時間 :</span>
+                <input type="datetime-local" name="datetime" id="rpStop-time">
+                <div class="show-sp-time"></div>
+            </div>
+        </div>
+    </div>
+    <!-- 地點 -->
+    <div class="location-box">
+        <div class="add-subtitle clearfix">
+            <div>
+                <span class="icon-loction"></span>
+                <p class="title">地點</p>
+            </div>
+        </div>
+        <div class="add-list">
+            <ul class="clearfix"></ul>
+        </div>
+    </div>
+    <!-- 備註 -->
+    <div class="remarks-box">
+        <div class="add-subtitle clearfix">
+            <div>
+                <span class="icon-data"></span>
+                <p class="title">備註</p>
+            </div>
+        </div>
+        <div class="add-list">
+            <input type="text" class="data-text remarks">
+        </div>
+    </div>
+    <!-- 閱讀人員 -->
+    <div class="people-box">
+        <div class="add-subtitle clearfix">
+            <div>
+                <span class="icon-people"></span>
+                <p class="title">閱讀人員選單</p>
+            </div>
+        </div>
+        <div class="add-list">
+            <button type="button" class="people-btn">閱讀人員選單</button>
+            <span class="people_in"></span>
+        </div>
+    </div>
+</div>
+
+<div class="add-btn clearfix">
+    <button type="button" name="" class="cancel">取消</button>
+    <button type="button" name="" class="confirm">確定新增</button>
+</div>
+
+<!-- 側邊視窗 -->
+<div class="slide-add">
+    <div class="container">
+        <div class="slideadd-top">
+            <!-- 行程分類 -->
+            <p class="trip-slide-title none">請選擇此行程的分類</p>
+            <!-- 提醒 -->
+            <p class="remind-slide-title none">請設定提醒時間</p>
+            <!-- 重複時間 -->
+            <p class="repeat-slide-title none">請設定提醒時間</p>
+        </div>
+        <div class="slideadd-content">
+            <!-- 行程分類 -->
+            <div class="trip-slide-content none">
+                <form action="">
+                    <ul class="clearfix"></ul>
+                </form>
+            </div>
+            <!-- 提醒 -->
+            <div class="remind-slide-content none">
+                <form action="">
+                    <ul class="clearfix">
+                    </ul>
+                </form>
+            </div>
+            <!-- 重複 -->
+            <div class="repeat-slide-content none">
+                <form action="">
+                    <ul class="clearfix"></ul>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="slide-add-btn clearfix">
+        <button type="button" name="" class="cancel">取消</button>
+        <button type="button" name="" class="confirm">確定</button>
+    </div>
+</div>
+
+<!-- 確定新增 彈跳視窗 -->
+<div class="confirm-window none">
+    <div class="title">是否確定新增行程？</div>
+    <form action="">
+        <input type="checkbox" id="new-add" class="">
+        <label for="new-add"></label>
+        <span>發出新增通知</span>
+    </form>
+    <div class="cfwindow-btn clearfix">
+        <button type="button" name="" class="cancel">取消</button>
+        <button type="button" name="" class="confirm">確定新增</button>
+    </div>
+</div>
+
+<!-- 確定修改 彈跳視窗 -->
+<div class="modify-confirm-window none">
+    <div class="title">是否確定修改行程？</div>
+    <form action="">
+        <input type="checkbox" id="new-modify" class="">
+        <label for="new-modify"></label>
+        <span>發出修改通知</span>
+    </form>
+    <div class="cfwindow-btn clearfix">
+        <button type="button" name="" class="cancel">取消</button>
+        <button type="button" name="" class="confirm">確定修改</button>
+    </div>
+</div>
+
+<!-- 與會人員 *****************************************************    -->
+<div class="staff_page" style="display:none">
+    <!--  -->
+    <div class="submit_b">
+        <div class="sub_inner">
+            <a href="javascript:void(0)">
+                <span>取消</span>
+            </a>
+            <a href="javascript:void(0)">
+                <span>送出</span>
+            </a>
+        </div>
+    </div>
+    <div class="content css_table ">
+        <!-- 選擇所有人員 -->
+        <div class="css_tr2 all_pad td_title">
+            <label>
+                <input type="checkbox" id="selectAllGroup" name="t1" value="">
+                <i></i>
+                <span>所有人員</span>
+            </label>
+        </div>
+        <!-- 選擇所有主管 -->
+        <div class="css_tr2 f_right all_pad td_title">
+            <label>
+                <input type="checkbox" id="selectChief" name="t2" value="">
+                <i></i>
+                <span>所有主管</span>
+            </label>
+        </div>
+        <!--  部門表格  -->
+        <div class="person_box"></div>
+    </div>
+</div>
+
+<!-- *************************************************************************** -->
+<script>
+    $(function () {
+        //resize glodal.js
+        pgTarget = $('.add-page');
+        re_window_add(pgTarget);
+
+        //add 側邊選單 resize
+        var re_addSlide = new addSlide();
+        $(window).resize(function () {
+            var re_addSlide = new addSlide();
+        });
+        var peopleFn = new chkPerson(); 
+    });
+
+    //回上一頁
+    var page;
+    var add_locat = function () {
+        var $this = this;
+        this.add_goPage = function (page) {
+            $.post(page + '.html', {}, function (pg) {
+                $('.page').html(pg);
+                if (page === 'overview') {
+                    $('footer,.calendar-box,.slideNav').hide();
+                } else {
+                    $('footer,.calendar-box,.slideNav').show();
+                }
+            });
+        }
+        this.init = function () {
+            var $target = $('.add-back').parents('header');
+            $('.add-back, .add-btn .cancel').on('click', function () {
+                var gotagget,
+                    $Back = String(pageHistory.slice(-2, -1)),
+                    $last = String(pageHistory.slice(-1));
+
+                if( $Back === $last ){
+                    pageHistory.pop();
+                    gotagget = String(pageHistory.slice(-2, -1));
+                    page = gotagget;
+                    $this.add_goPage(page);
+                }else{
+                    page = $Back;
+                    $this.add_goPage(page);
+                }                
+            });
+        }
+        $this.init();
+    }
+    var addpage = new add_locat();
+
+    //側邊選單內容產生 & 視窗動態滑出滑入
+    var slideadd = function () {
+        var slideAdd = $('.slide-add'),
+            slideBg  = $('.slide-nav-bg');
+
+        var fn = {
+            //顯示
+            menu_out: function () {
+                slideBg.fadeIn();
+                slideAdd.stop().animate({ 'left': 0 }, 500, 'swing');
+            },
+            //隱藏
+            menu_in: function () {
+                slideBg.fadeOut();
+                slideAdd.stop().animate({'left': '-75vmin'}, 500, 'swing');
+            },
+            //行程分類
+            trip_Slide: function () {
+                for (var i = 0; i < addCon_obj.slideContent.length; i++) {
+                    var _li    = $('<li>'),
+                        _input = $('<input type="checkbox">')
+                                    .attr('id',"tripContent-input0"+ i)
+                                    .addClass(addCon_obj.slideContent[i].Classtype),
+                        _label = $('<label for="tripContent-input0' + i + '">').text(addCon_obj.slideContent[i].type);
+                    _li.append(_input,_label);
+                    $('.trip-slide-content form ul').append(_li);
+                }
+            },
+            //提醒
+            remind_Slide: function () {
+                var remindUl = $('.remind-slide-content form ul');
+                for (var i = 0; i < addCon_obj.remindContent.length; i++) {
+                    var _li    = $('<li>'),
+                        _input = $('<input type="checkbox">')
+                                    .attr('id',"remindContent-input0"+ i)
+                                    .addClass(addCon_obj.remindContent[i].Classtype),
+                        _label = $('<label for="remindContent-input0' + i + '">').text(addCon_obj.remindContent[i].type);
+                    _li.append(_input,_label);
+                    $('.remind-slide-content form ul').append(_li);
+                };
+
+                //自訂btn
+                var customDiv    = $('<li>').append('<div class="custom-div">自訂</div>');
+                //自訂 ___分鐘前
+                var cus_option_m = $('<option value="分鐘">分鐘</option>'),
+                    cus_option_h = $('<option value="小時">小時</option>'),
+                    cus_option_d = $('<option value="天">天</option>'),
+                    cus_select   = $('<select name="" id="custom-select">').append(cus_option_m,cus_option_h,cus_option_d),
+                    cus_input    = $('<input type="number" id="custiom-input" class="custom-time">'),
+                    cus_li       = $('<li>').append(cus_input,cus_select);
+
+                remindUl.append(customDiv, cus_li);
+            },
+            //重複時間
+            repeat_Slide: function () {
+                for (var i = 0; i < addCon_obj.repeatContent.length; i++) {
+                    var _li    = $('<li>'),
+                        _input = $('<input type="checkbox">')
+                                    .attr('id',"repeatContent-input0"+ i)
+                                    .addClass(addCon_obj.repeatContent[i].Classtype),
+                        _label = $('<label for="repeatContent-input0' + i + '">').text(addCon_obj.repeatContent[i].type);
+                    _li.append(_input,_label);
+                    $('.repeat-slide-content form ul').append(_li);
+                }
+            },
+            // 同時只能點一個項目
+            chk_input: function () {
+                $('.slide-add input[type="checkbox"]').on('click', function () {
+                    var par_div      = $(this).closest('div'),
+                        input_status = $(this).prop('checked');
+                    
+                    // 同時只能點一個項目
+                    if (input_status === false) {
+                        $(this).prop('checked', false);
+                        return;
+                    }
+                    par_div.children().find('input').prop('checked', false);
+                    $(this).prop('checked', true);
+                });
+            },
+            init: function () {
+                var _this           = this,
+                    classifyBox_sub = $('.trip-classify-box .add-subtitle'),
+                    remindSub       = $('.remind-box .add-subtitle'),
+                    repeatSub       = $('.repeat-box .add-subtitle'),
+                    slideBtn        = $('.slide-add-btn');
+                
+                _this.trip_Slide();
+                _this.remind_Slide();
+                _this.repeat_Slide();
+                _this.chk_input();
+                
+                //開啟行程分類側邊選單的btn
+                classifyBox_sub.on('click', 'button', function () {
+                    _this.menu_out();
+                    $('.trip-slide-title,.trip-slide-content').removeClass('none');
+                });
+
+                //提醒btn
+                remindSub.on('click', 'button', function () {
+                    _this.menu_out();
+                    $('.remind-slide-title, .remind-slide-content').removeClass('none');
+                });
+
+                //重複時間btn
+                repeatSub.on('click', 'button', function () {
+                    _this.menu_out();
+                    $('.repeat-slide-title,.repeat-slide-content').removeClass('none');
+                });
+
+                // //側邊選單內按鈕確定按鈕
+                slideBtn.on('click','button',function(){
+                    
+                    $('.slideadd-top p, .slideadd-content div').addClass('none')
+                }); 
+            }
+        };
+        fn.init();
+        return fn;
+    }
+    var addSl_fn = new slideadd();
+
+    // 動態載入側邊選單選取項目 & 取值
+    var dyn_data = function () {
+        var $this     = this,
+            on_change = false, // 判斷提醒區塊是哪個區塊在作用
+            no_select = true,
+            remind_val;
+
+        // 行程分類
+        var trip_new,
+            trip_Classtype,
+            trip_type,
+            trip_label   = $('.trip-slide-content input[type="checkbox"] + label');
+        // 重複
+        var repeat_Classtype,
+            repeat_text,
+            repeat_type,
+            repeat_new,
+            repeat_label = $('.repeat-slide-content input[type="checkbox"] + label')
+        //提醒
+        var remind_new,
+            remind_type,
+            remind_Classtype,
+            remind_text,
+            remind_label = $('.remind-slide-content input[type="checkbox"] + label'),
+            remind_chk   = $('.remind-slide-content input[type="checkbox"]'),
+            remind_num   = $('.remind-slide-content input[type="number"]');
+        //提醒 - 自訂區塊
+        var text_vaule,
+            re_text_Classtype,
+            cus_obj,
+            cus_num,
+            cus_time,
+            cus_class;
+
+        // 沒有點選判斷值
+        var no_chk = 0;
+        // 提醒區塊判斷值
+        var on_change;
+
+        this.trip_block = function () {
+            // 行程分類
+            $('.trip-slide-content input[type="checkbox"] + label').on('click', function () {
+                trip_Classtype = $(this).prev().attr('class');
+                trip_type      = $(this).text();
+                no_chk = 1;
+            });
+            
+        }
+        this.repeat_block = function () {
+            // 重複
+            repeat_label.on('click', function () {
+                repeat_Classtype = $(this).prev().attr('class');
+                repeat_text      = $(this).text();
+                repeat_type      = repeat_text.substr(0, 2); // 取值
+
+                no_chk = 2;
+            });
+        }
+        this.remind_block = function () {
+            // 提醒 - 上方input
+            remind_label.on('click', function () {
+                // 防呆判斷
+                $('#custiom-select').val('分鐘').trigger('change');
+                remind_num.val('');
+                remind_Classtype = $(this).prev().attr('class');
+                remind_text      = $(this).text();
+                remind_type      = remind_text.substr(0, 5);
+
+                on_change = false;
+                no_chk = 3;
+            });
+
+            //提醒 - 自訂區塊select
+            $('#custom-select').change(function () {
+                // 防呆判斷
+                remind_chk.prop('checked', false);
+                cus_time  = $(this).val();
+
+                on_change = true;
+                no_select = false;
+                no_chk = 4;
+            })
+            // input - 只能輸入數字
+            remind_num.change(function () {
+                // 防呆判斷
+                remind_chk.prop('checked', false);
+                $(this).attr('value', $(this).val());
+                text_vaule        = $(this).attr('value');
+                re_text_Classtype = $(this).attr('class');
+                cus_num           = text_vaule;
+                cus_class         = re_text_Classtype;
+
+                on_change = true;
+                no_chk = 4;
+            });
+            // 預設時間為分鐘
+            $('#custiom-select').val('分鐘').trigger('change');
+
+        }
+        // 判斷側邊選單內容點選是否，並動態產入
+        this.addSlide_jud = function () {
+
+            var trip_has   = $('.trip-slide-content').hasClass('none'),
+                remind_has = $('.remind-slide-content').hasClass('none'),
+                repeat_has = $('.repeat-slide-content').hasClass('none'),
+                tripLi     = $('.trip-classify-box .add-list ul li'),
+                repeatLi   = $('.repeat-box .add-list ul li'),
+                remindLi   = $('.remind-box .add-list ul li');
+            /* 
+                判斷是否有點選內容後再按確定按鈕
+                若沒有點選內容 則no_chk = 0
+            */
+
+            if (no_chk === 0) {
+                return;
+            }
+            console.log(no_select)
+            if (trip_has === true && no_chk === 1) {
+                last_input = true;
+                tripLi.remove();
+                trip_new = {"type": trip_type,"Classtype": trip_Classtype};
+                cusObj["Tag"].splice(-1, 1, trip_new);
+                pfAd_fn.trip_List(last_input);
+            }
+            if (repeat_has === true && no_chk === 2) {
+                last_input = true;
+                repeatLi.remove();
+                repeat_new = {'type': repeat_type,'Classtype': repeat_Classtype};
+                addCon_obj.repeatText.splice(-1, 1, repeat_new);
+                pfAd_fn.repeat_List(last_input);
+            }
+            if (remind_has === true && on_change === false && no_chk === 3) {
+                last_input = true;
+                re_loadInput = false;
+                remindLi.remove();
+                remind_new = {'type': remind_type, 'Classtype': remind_Classtype};
+                addCon_obj.remindText.splice(-1, 1, remind_new);
+                pfAd_fn.remind_List(last_input);
+
+            }else if (no_select === true && no_chk === 4) {
+                console.log('chg false')
+                last_input = true;
+                re_loadInput = true;
+                remindLi.remove();
+                cus_obj = { 'type': cus_num + '分鐘','Classtype': cus_class};
+
+                addCon_obj.remindText.splice(-1, 1, cus_obj);
+                remind_val = cus_num
+                pfAd_fn.remind_List(last_input);
+
+            }else if (remind_has === true && on_change === true && no_chk === 4) {
+                console.log('chg true')
+                last_input = true;
+                re_loadInput = true;
+                remindLi.remove();
+                cus_obj = { 'type': cus_num + cus_time,'Classtype': cus_class};
+
+                addCon_obj.remindText.splice(-1, 1, cus_obj);
+                pfAd_fn.remind_List(last_input);
+
+            }
+        }
+        this.btn_confirm_chk = function () {
+            // 判斷確認按鈕
+            $('.slide-add-btn').on('click', 'button', function () {
+                var addSlide_btn = $(this).attr('class');
+                $this.addSlide_jud();
+                addSl_fn.menu_in(); //隱藏區塊
+                $('.slideadd-top p, .slideadd-content div').addClass('none')
+            });
+        }
+        this.init = function () {
+            $this.remind_block();
+            $this.trip_block();
+            $this.repeat_block();
+            $this.btn_confirm_chk();
+        }
+        $this.init();
+    }
+    var dynDa_fn = new dyn_data();
+
+    /*
+    一開始顯示的內容 & 側邊選單新增內容 + 點選效果; 
+    last_input 判斷是否為重新載入，如果是，就在最後一個input狀態改true
+    */
+    var pageAdd = function () {
+        var $this = this;
+        var otherDiv = $('.remind-box,.repeat-box,.location-box');
+        //行程分類點選效果 - 陣列在js.js檔案裡
+        this.trip_List = function (last_input) {
+            for (var i = 0; i < cusObj["Tag"].length; i++) {
+                var _li    = $('<li>'),
+                    _input = $('<input type="checkbox">')
+                                .attr('id',"trip-input0"+ i)
+                                .addClass(cusObj["Tag"][i].Classtype),
+                    _label = $('<label for="trip-input0'+ i +'">').text(cusObj["Tag"][i].type);
+                _li.append(_input,_label);
+
+                $('.trip-classify-box .add-list ul').append(_li);
+                otherDiv.find('input').attr('disabled', false);
+                otherDiv.children('div').find('button').attr('disabled', false);
+            }
+            /*
+                當側邊選單有選取項目，並且動態加入時
+                將新增項目的樣式，改成已選取狀態
+            */
+            if (last_input === true) {
+                $('.trip-classify-box li:last-child').children('input').prop('checked', true);
+            }
+
+            $('.trip-classify-box input[type="checkbox"]').on('click', function () {
+                var input_status = $(this).prop('checked'),
+                    input_class  = $(this).attr('class');
+
+                if (input_status === false) {
+                    $(this).prop('checked', false);
+                    return;
+                }
+                $('.trip-classify-box input[type="checkbox"]').prop('checked', false);
+                $(this).prop('checked', true);
+
+                // 當請假被點選時，點選請假以外區塊
+                if (input_class !== "leave") {
+                    otherDiv.find('input').attr('disabled', false);
+                    otherDiv.children('div').find('button').attr('disabled', false);
+                }
+            });
+
+            // 如果選取 請假 以下區塊禁用
+            $('input[type="checkbox"].leave').on('click', function () {
+                var leave_status = $(this).prop('checked');
+                if (leave_status === true) {
+                    otherDiv.find('input').attr('disabled', true);
+                    otherDiv.children('div').find('button').attr('disabled', true);
+                } else {
+                    otherDiv.find('input').attr('disabled', false);
+                    otherDiv.children('div').find('button').attr('disabled', false);
+                }
+            });
+        }
+        //提醒
+        this.remind_List = function (last_input) {
+
+            for (var i = 0; i < addCon_obj.remindText.length; i++) {
+                var _li    = $('<li>'),
+                    _input = $('<input type="checkbox">')
+                                .attr('id',"remind-input0"+ i)
+                                .addClass(addCon_obj.remindText[i].Classtype),
+                    _label = $('<label for="remind-input0'+ i +'">').text(addCon_obj.remindText[i].type);
+                _li.append(_input,_label);
+                $('.remind-box .add-list ul').append(_li);
+            }
+            /*
+                當側邊選單有選取項目，並且動態加入時
+                將新增項目的樣式，改成已選取狀態
+            */
+            if( re_loadInput === true ){
+                var a = $('.remind-box li:last-child label').text();
+                var re_num = parseInt(a)  // 數字
+                var get_time = $('#custom-select :selected').val();
+                var re_time;
+      
+                if( get_time == '分鐘' ){
+                    re_time = 'm'
+                }else if( get_time == '小時' ){
+                    re_time = 'h'
+                }else{
+                    re_time = 'd'
+                }
+            }
+
+            if (last_input === true) {
+                $('.remind-box li:last-child').children('input').prop('checked', true).val(re_num+re_time)
+            }
+                
+            $('.remind-box input[type="checkbox"]').on('click', function () {
+                var input_status = $(this).prop('checked'),
+                    input_class  = $(this).attr('class');
+
+                if (input_status === false) {
+                    $(this).prop('checked', false);
+                    return;
+                }
+                $('.remind-box input[type="checkbox"]').prop('checked', false);
+                $(this).prop('checked', true);
+            });
+        }
+        //重複
+        this.repeat_List = function (last_input) {
+            for (var i = 0; i < addCon_obj.repeatText.length; i++) {
+                // console.log( addCon_obj.repeatText[2].type)
+                var _li    = $('<li>'),
+                    _input = $('<input type="checkbox">')
+                                .attr('id',"repeat-input0"+ i)
+                                .addClass(addCon_obj.repeatText[i].Classtype),
+                    _label = $('<label for="repeat-input0'+ i +'">').text(addCon_obj.repeatText[i].type);
+                
+                _li.append(_input,_label);
+                $('.repeat-box .add-list ul').append(_li);
+            }
+            // 清除input
+            $('.repeat-stop').hide();
+
+            // 當側邊選單有選取項目，並且動態加入時，將新增項目的樣式，改成已選取狀態
+            if (last_input === true) {
+                $('.repeat-box li:last-child').children('input').prop('checked', true);
+                $('.repeat-stop').show();
+            }
+
+            $('.repeat-box input[type="checkbox"]').on('click', function () {
+                var input_status = $(this).prop('checked'),
+                    input_class  = $(this).attr('class');
+                    
+                if(input_status === false){
+                    $(this).prop('checked', false);
+                    // 刪除結束時間的input
+                    $('.repeat-stop').hide();
+                    return;
+                }
+                // 選擇無重複以外的選項
+                if( input_class !== "norepeat" ){
+                    // 結束時間選擇
+                    $('.repeat-stop').show();
+                    chk_repeat = input_class;  // 會議室預約判斷值
+                }else{
+                    $('.repeat-stop').hide();
+                    chk_repeat = "norepeat"; // 會議室預約判斷值
+                }
+                $('.repeat-box input[type="checkbox"]').prop('checked', false);
+                $(this).prop('checked', true);
+            });
+        }
+        //地點
+        this.location_List = function () {
+            var addList   = $('.location-box .add-list'),
+                input_add = $('<input type="text" class="address">'),
+                inputAdd  = $('input[type="text"].address');               
+            
+            // 預約會議室的時間地點隱藏
+            $('.meeting-room').hide();
+            
+            for (var i = 0; i < addCon_obj.locationText.length; i++) {
+                var _li    = $('<li>'),
+                    _input = $('<input type="checkbox">').attr('id',"location-input0"+ i).addClass(addCon_obj.locationText[i].Classtype),
+                    _label = $('<label for="location-input0' + i + '">').text(addCon_obj.locationText[i].type);
+                _li.append(_input,_label);
+                $('.location-box .add-list ul').append(_li);
+            }
+            
+            // hasData=true 預約會議室的時間地點顯示
+            if( hasData === true ){
+                $('.mettingroom').prop('checked',true);
+                $('.meeting-room').show();
+                $('.room-name').text(roomName + ov_roomObj);
+                $('.room-time .day').text(ov_dayObj);
+                $('.room-time .time').text(s_time + ':00' + '-' + e_time + ':00');
+            }
+
+            $('.location-box input[type="checkbox"]').on('click', function () {
+                var input_status = $(this).prop('checked'),
+                    input_class  = $(this).attr('class');
+
+                if (input_status === false) {
+                    $(this).prop('checked', false);
+                    return;
+                }
+
+                if (input_class === 'noloca') {
+                    $('.meeting-room').hide();
+                    $('.address').remove();
+
+                }else if (input_class !== 'otherloca') {
+                    $('.address').remove();
+                }
+
+                $('.location-box input[type="checkbox"]').prop('checked', false);
+                $(this).prop('checked', true);
+            });
+
+            // 點選實際地點 在下方新增輸入框
+            $('.otherloca').on('click', function () {
+                var chkStatus = $(this).prop('checked');
+
+                if (chkStatus === true) {
+                    addList.append(input_add);
+                    $('.location-box .address').change(function(){
+                        // 按手機鍵盤的開始後，會自行把鍵盤收回
+                        $(this).blur(); 
+                    });
+
+                } else if (chkStatus === false) {
+                    $('.address').remove();
+                }
+            });
+
+            //地點>會議按鈕時 跳去overview
+            $('.mettingroom').on('click', function () {
+                page = 'overview';
+                addpage.add_goPage(page);
+            });
+
+ 
+        }
+        //開始時間
+        this.star_time = function () {
+            console.log('111111')
+            var s_mouthText,
+                s_dayText;
+            
+            $('#s-datetime').change(function () {
+                console.log('22222')
+                var s_dateType   = $(this).val(),
+                    s_mouthText  = s_dateType.substr(5, 2),
+                    s_dayText    = s_dateType.substr(8, 2),
+                    s_hourText   = s_dateType.substr(11, 2),
+                    s_minuteText = s_dateType.substr(14, 2);
+                var s_getweek    = new Date(s_dateType).getDay();
+                
+                // var trm = new Date(s_dateType);
+                // var getZh = d.toLocaleString();
+
+
+                switch (s_getweek) {
+                    case 0:
+                        s_zh_week_text = addCon_obj.zhWeek[0];
+                        break;
+                    case 1:
+                        s_zh_week_text = addCon_obj.zhWeek[1];
+                        break;
+                    case 2:
+                        s_zh_week_text = addCon_obj.zhWeek[2];
+                        break;
+                    case 3:
+                        s_zh_week_text = addCon_obj.zhWeek[3];
+                        break;
+                    case 4:
+                        s_zh_week_text = addCon_obj.zhWeek[4];
+                        break;
+                    case 5:
+                        s_zh_week_text = addCon_obj.zhWeek[5];
+                        break;
+                    case 6:
+                        s_zh_week_text = addCon_obj.zhWeek[6];
+                        break;
+                    default:
+                        break;
+                }
+                var s_div_dataText = $('<div class="date-text">').text(s_mouthText + '月' + s_dayText +'日' + ' ' + '週' + s_zh_week_text);
+                var s_div_timeText = $('<div class="time-text">').text(s_hourText + ' : ' + s_minuteText);
+                $('.star-time-text').text('').append(s_div_dataText, s_div_timeText);
+
+                // 取到時間日期星期的值傳到 add_obj
+                add_obj.startime.hour   = s_hourText;
+                add_obj.startime.minute = s_minuteText;
+                add_obj.startime.week   = s_zh_week_text;
+                add_obj.startime.mouth  = s_mouthText;
+                add_obj.startime.day    = s_dayText;
+            });
+        }
+        //結束時間
+        this.end_time = function () {
+            var e_mouthText,
+                e_dayText;
+            $('#e-datetime').change(function () {
+                var e_dateType   = $(this).val(),
+                    e_mouthText  = e_dateType.substr(5, 2),
+                    e_dayText    = e_dateType.substr(8, 2),
+                    e_hourText   = e_dateType.substr(11, 2),
+                    e_minuteText = e_dateType.substr(14, 2);
+                var e_getweek    = new Date(e_dateType).getDay();
+                switch (e_getweek) {
+                    case 0:
+                        e_zh_week_text = addCon_obj.zhWeek[0];
+                        break;
+                    case 1:
+                        e_zh_week_text = addCon_obj.zhWeek[1];
+                        break;
+                    case 2:
+                        e_zh_week_text = addCon_obj.zhWeek[2];
+                        break;
+                    case 3:
+                        e_zh_week_text = addCon_obj.zhWeek[3];
+                        break;
+                    case 4:
+                        e_zh_week_text = addCon_obj.zhWeek[4];
+                        break;
+                    case 5:
+                        e_zh_week_text = addCon_obj.zhWeek[5];
+                        break;
+                    case 6:
+                        e_zh_week_text = addCon_obj.zhWeek[6];
+                        break;
+                    default:
+                        break;
+                }
+                var e_div_dataText = $('<div class="date-text">').text(e_mouthText + '月' + e_dayText +
+                    '日' + ' ' + '週' + e_zh_week_text);
+                var e_div_timeText = $('<div class="time-text">').text(e_hourText + ' : ' +
+                    e_minuteText);
+                $('.end-time-text').text('').append(e_div_dataText, e_div_timeText);
+                // 取到時間日期星期的值傳到 add_obj
+                add_obj.endtime.hour   = e_hourText;
+                add_obj.endtime.minute = e_minuteText;
+                add_obj.endtime.week   = e_zh_week_text;
+                add_obj.endtime.mouth  = e_mouthText;
+                add_obj.endtime.day    = e_dayText;
+            });
+        }
+        //以下是各個行程內容點選後，取值存到 add_obj 物件裡面
+        this.getValue = function () {
+
+            // 行程分類 提醒 重覆 地點 備註
+            $('.add-list input[type="checkbox"]').on('click', function () {
+                var par_type = $(this).closest('div').parent().attr('class'),
+                    input_class = $(this).attr('class');
+                // 判斷點選的是哪個項目，再把取到Class存入
+                switch (par_type) {
+                    case "trip-classify-box":
+                        add_obj.addelse.tripClassify = input_class;
+                        break;
+                    case "remind-box":
+                        add_obj.addelse.remind = input_class;
+                        break;
+                    case "repeat-box":
+                        add_obj.addelse.repeat = input_class;
+                        break;
+                    case "location-box":
+                        add_obj.addelse.location = input_class;
+                        break;
+                    default:
+                        break;
+                }
+            });
+            //重覆底下時間選取
+            $('#rpStop-time').change(function (){
+                var sp_dateType   = $(this).val(),
+                    sp_yearText   = sp_dateType.substr(0, 4),
+                    sp_mouthText  = sp_dateType.substr(5, 2),
+                    sp_dayText    = sp_dateType.substr(8, 2),
+                    sp_hourText   = sp_dateType.substr(11, 2),
+                    sp_minuteText = sp_dateType.substr(14, 2);
+                var sp_stopweek   = new Date(sp_dateType).getDay();
+                switch (sp_stopweek) {
+                    case 0:
+                        sp_zh_week_text = addCon_obj.zhWeek[0];
+                        break;
+                    case 1:
+                        sp_zh_week_text = addCon_obj.zhWeek[1];
+                        break;
+                    case 2:
+                        sp_zh_week_text = addCon_obj.zhWeek[2];
+                        break;
+                    case 3:
+                        sp_zh_week_text = addCon_obj.zhWeek[3];
+                        break;
+                    case 4:
+                        sp_zh_week_text = addCon_obj.zhWeek[4];
+                        break;
+                    case 5:
+                        sp_zh_week_text = addCon_obj.zhWeek[5];
+                        break;
+                    case 6:
+                        sp_zh_week_text = addCon_obj.zhWeek[6];
+                        break;
+                    default:
+                        break;
+                }
+                var sp_div_dataText = $('<div class="sp-date-text">')
+                    .text(sp_yearText + '年' + sp_mouthText + '月' + sp_dayText + '日' + ' ' + '週' + sp_zh_week_text);
+                var sp_div_timeText = $('<div class="sp-time-text">')
+                    .text(sp_hourText + ' : ' + sp_minuteText);
+                $('.show-sp-time').append(sp_div_dataText, sp_div_timeText);
+
+                // 取到時間日期星期的值傳到 add_obj
+                add_obj.stoptime.year   = sp_yearText;
+                add_obj.stoptime.hour   = sp_hourText;
+                add_obj.stoptime.minute = sp_minuteText;
+                add_obj.stoptime.week   = sp_zh_week_text;
+                add_obj.stoptime.mouth  = sp_mouthText;
+                add_obj.stoptime.day    = sp_dayText;
+            });
+
+            //全天、置頂 
+            $('.addTop-chk input[type="checkbox"]').on('click', function () {
+
+                var chkClass = $(this).attr('class'),
+                    chkType  = $(this).prop('checked');
+
+                // 判斷點選的是哪個項目，再把取到Class存入
+                if (chkClass === "all-day" && chkType === true) {
+                    add_obj.addelse.allDay = true;
+
+                } else if (chkClass === "to-top" && chkType === true) {
+                    add_obj.addelse.toTop = true;
+
+                } else if (chkClass === "all-day" && chkType === false) {
+                    add_obj.addelse.allDay = false;
+
+                } else if (chkClass === "to-top" && chkType === false) {
+                    add_obj.addelse.toTop = false;
+                }
+            });
+            // 備註 & 標題
+            $('.add-page input[type="text"]').change(function () {
+
+                $(this).attr('value', $(this).val());
+
+                var getRemarks       = $(this).attr('value'),
+                    input_text_Class = $(this).attr('class');
+
+                // 判斷點選的是哪個項目，再把取到Class存入
+                switch (input_text_Class) {
+                    case "data-text remarks":
+                        add_obj.addelse.remarks = getRemarks;
+                        break;
+                    case "ord-title":
+                        add_obj.addelse.ordTitle = getRemarks;
+                        break;
+                    default:
+                        break;
+                }
+                // 按手機鍵盤的開始後，會自行把鍵盤收回
+                $(this).blur(); 
+
+            });
+        }
+        // 確定新增 & 取消的按鈕
+        this.addClose = function () {
+            $('.add-btn .confirm').on('click',function(){
+                pgCf_fn.add_chk();
+                page = String(pageHistory.slice(-2, -1));
+                pageHistory.push(page);
+            });
+        }
+        this.init = function () {
+            $('footer,.calendar-box,.slideNav').hide();
+            $this.star_time();
+            $this.end_time();
+            $this.addClose();
+            $this.trip_List();
+            $this.remind_List();
+            $this.repeat_List();
+            $this.location_List();
+            $this.getValue();
+        }
+        $this.init();
+    }
+    var pfAd_fn = new pageAdd();
+
+    //彈出確認視窗
+    var pageConfirm = function () {
+        var Chk,
+            $this = this,
+            slideNav_bg   = $('.slide-nav-bg'),
+            confirm_win   = $('.confirm-window'),
+            m_confirm_win = $('.modify-confirm-window');
+
+        this.add_chk = function () {
+            slideNav_bg.fadeIn();
+            confirm_win.removeClass('none');
+        }
+        this.cf_chk = function () {
+            slideNav_bg.fadeOut();
+            confirm_win.addClass('none');
+        }
+        this.cfClose = function () {
+            $('.cfwindow-btn').on('click', 'button', function () {
+                var attrClass = $(this).attr('class');
+                if (attrClass === 'confirm') {
+                    Chk = true;
+                    $this.cf_chk();
+                } else if (attrClass === 'cancel') {
+                    Chk = false;
+                    $this.cf_chk();
+                }
+            });
+        }
+        this.init = function () {
+            //預設發出新增通知
+            var confirmInput01   = $('.confirm-window input[type="checkbox"]'),
+                //預設發出修改通知
+                confirmInput02   = $('.modify-confirm-window input[type="checkbox"]'),
+                confirmInput_1_2 = $('.confirm-window input[type="checkbox"], .modify-confirm-window input[type="checkbox"]');
+
+            confirmInput01.prop('checked', true).next('label').addClass('icon-tick');
+            confirmInput02.prop('checked', false).next('label');
+
+            confirmInput_1_2.on('click', function () {
+                $(this).next().toggleClass('icon-tick')
+            });
+        
+            $this.cfClose();
+        }
+        $this.init();
+    };
+    var pgCf_fn = new pageConfirm();
+</script>
+</html>

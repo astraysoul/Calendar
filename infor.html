@@ -1,0 +1,61 @@
+<header class="info-header">
+    <div class="top-menu">
+        <div class="info-title">動態消息</div>
+    </div>
+</header>
+<div class="info-page">
+    <div class="infor-content">
+        <ul> </ul>
+    </div>
+</div>
+
+<script>
+$(function(){
+    pgTarget = $('.infor-content');
+    var re_size_infor = new re_window_other(pgTarget);
+});
+
+var folder_data = function(){
+    for( var i=0; i< obj_folder.length; i++ ){
+        var icon_span;
+        var _modify = obj_folder[i].type;
+
+        if( _modify === '修改' ){
+            icon_span = $('<span class="icon-change-2">');
+        }else if( _modify === '新增'){
+            icon_span = $('<span class="icon-added">');
+        }else if( _modify === '提醒'){
+            icon_span = $('<span class="icon-remind-2">');
+        }else if( _modify === '取消' ){
+            icon_span = $('<span class="icon-cancel">');
+        }else if(_modify === '刪除'){
+            icon_span = $('<span class="icon-delete">');
+        }
+
+        var span_whos = $('<span>').text(obj_folder[i].whos + obj_folder[i].type + '預定'),
+            p_list_whos = $('<p>').append(span_whos),
+            p_list_title = $('<p class="list-title">').text(obj_folder[i].theme),
+            p_list_time = $('<p class="list-time">').text(obj_folder[i].minute + '分鐘前'),    
+            _infor_icon_p = $('<p>').text(obj_folder[i].type),
+            div_infor_icon = $('<div class="info-icon">').append(icon_span, _infor_icon_p),
+            div_infor_list = $('<div class="infor-content-list">')
+                .append(p_list_whos, p_list_title, p_list_time),
+            _infor_li = $('<li>').append(div_infor_icon, div_infor_list);
+        $('.infor-content ul').append(_infor_li);
+    }
+}
+folder_data();
+
+var notRead = function(){
+    var $this   = this,
+        inforLi = $('.infor-content ul li');
+    this.init = function(){
+        inforLi.on('click',function(){
+            var page = $(this).attr('data-page');
+            $(this).addClass('hasread');
+        });
+    }
+    $this.init();
+}
+var infor = new notRead();
+</script>

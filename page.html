@@ -1,0 +1,281 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>行事曆</title>
+    <link rel="stylesheet" href="assets/js/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/reset.css">
+    <link rel="stylesheet" href="assets/css/custom.css">
+</head>
+<body> -->
+
+
+<header class="meeting-con-header">
+    <!-- 上方選單 -->
+    <div class="top-menu clearfix">
+        <div class="meeting-con-back icon-arrow"></div>
+        <div class="meeting-con-title">會議</div>
+        <div class="meeting-con-chg">
+            <select name="" id="pgcontent-select">
+                <option value="修改">修改</option>
+                <option value="刪除">刪除</option>
+                <option value="複製">複製</option>
+                <option value="收藏">收藏</option>
+            </select>
+            <span class=" icon-point">
+        </div>
+    </div>
+</header>
+<div class="meeting-con-page">
+    
+    <!-- 標題 -->
+    <div class="m-content-title"></div>      
+    <!-- 時間 -->
+    <div class="m-content-time">
+        <div class="star-end">
+            <ul>
+                <li class="star-box"></li>
+                <li>
+                    <span class="icon-goto"></span>
+                </li>
+                <li class="end-box"></li>
+            </ul>
+        </div>
+    </div>
+    <!-- 內容 -->
+    <div class="m-content-detail-wrap">
+        <div class="m-content-detail"></div>
+    </div>
+
+    <!-- 發佈相關資訊 -->
+    <div class="m-content-status"></div>
+</div>
+
+<!-- 確定刪除 彈跳視窗 -->
+<div class="delete-confirm-window none">
+    <div class="title">確定刪除此筆行程？</div>
+    <form action="">
+        <input type="checkbox" id="delete-data" class="">
+        <label for="delete-data"></label>
+        <span>發出刪除通知</span>
+    </form>
+    <div class="cfwindow-btn clearfix">
+        <button type="button" name="" class="cancel">取消</button>
+        <button type="button" name="" class="confirm">確定刪除</button>
+    </div>
+</div>
+
+<!-- 已收藏 彈跳視窗 -->
+<div class="folder-confirm-window none">
+    <div class="title">已加入收藏紀錄</div>
+    <div class="cfwindow-btn clearfix">
+        <button type="button" name="" class="confirm">確定收藏</button>
+    </div>
+</div>
+
+
+<!-- 聊天室 -->
+<div class="icon-chatroom" data-id="chatroom" onclick=""></div>
+
+<!-- </body>
+<script src="assets/js/jquery-3.2.1.min.js"></script>
+<script src="assets/js/jquery.touchwipe.js"></script>
+<script src="assets/js/bootstrap/js/bootstrap.min.js"></script>
+<script src="assets/js/jquery.hashchange.js"></script>
+<script src="assets/js/global.js"></script>
+<script src="assets/js/js.js"></script> -->
+
+<script>
+     
+var pageChange_meeting_con = function () {
+    var $this = this;
+    this.add_goPage = function (page) {
+        console.log(page)
+        $.post(page + '.html', {}, function (pg) {
+            if(page === 'calendar'){
+                btn_cahhhhhh(btn_name);
+                $('footer,.calendar-box,.slideNav').show();
+                $('.page').html(pg);
+
+            }else if(page === 'chatroom'){
+                $('footer,.calendar-box,.slideNav').hide();
+                $('.page').html(pg);
+
+            }else{
+                $('.page').html(pg);
+            }
+        });
+    }
+    this.init = function () {
+        $('.meeting-con-back').on('click',function(){
+            page = 'calendar';
+            $this.add_goPage(page);
+        });
+        $('.icon-chatroom[data-id="chatroom"]').on('click',function(){
+            page = 'chatroom';
+            $this.add_goPage(page);
+        });
+    }
+    $this.init();
+}
+var pg_chg_mc = new pageChange_meeting_con();
+
+//
+var meetingRom_fn = function(){
+    // add.html 去撈以下資料
+    // 會議室 input class="mettingroom" value="A1會議室"
+    // 備註 input class="data-text" value="請哲瑄準備相關報告"
+    // 閱讀人員選單
+    // 提醒 remindText
+    // 重覆 repeatText
+
+    var $this = this,
+        change_val,
+        slideNav_bg = $('.slide-nav-bg'),
+        fol_win = $('.folder-confirm-window');
+        del_win = $('.delete-confirm-window');
+    // 判斷聊天室有無訊息
+    this.hasMsg = function(){
+        // 將ctMsg 一開始設false(沒聊天訊息)
+        // 若有聊天訊息 將ctMsg 設為 true
+        var ctMsg     = true,
+            $chatroom = $('.icon-chatroom[data-id="chatroom"]');
+        // 判斷 true or false 來增加class
+        ctMsg ? $chatroom.addClass('active') : $chatroom.removeClass('active')
+    }
+    // 會議內容
+    this.content_detail = function(){
+         // m-content-title 標題
+         $('.m-content-title').text(pgCon[0].container.ordTitle);
+
+        // 開始時間
+        var starDay = $('<p class="star-day">').text(pgCon[0].startime.mouth+'月'+' '+pgCon[0].startime.day+'日'),
+            starWeek = $('<p class="star-week">').text('週'+pgCon[0].startime.week);
+        var star_Top = $('<div class="star-top">').append(starDay,starWeek),
+            star_Time = $('<div class="star-time">').text(pgCon[0].startime.hour+' : '+pgCon[0].startime.minute);
+        $('.star-box').append(star_Top,star_Time);
+        
+        // 結束時間
+        var endDay = $('<p class="end-day">').text(pgCon[0].endtime.mouth+'月'+' '+pgCon[0].endtime.day+'日'),
+            endWeek = $('<p class="end-week">').text('週'+pgCon[0].endtime.week);
+        var end_Top = $('<div class="end-top">').append(endDay,endWeek),
+            end_Time = $('<div class="end-time">').text(pgCon[0].endtime.hour+' : '+pgCon[0].endtime.minute);
+        $('.end-box').append(end_Top,end_Time);
+
+       
+        
+        //m-content-detail-wrap 中間區塊
+        var p_icon_location = $('<p class="icon-loction">'),
+            p_location = $('<p>').text(pgCon[0].container.location),
+
+            p_icon_people = $('<p class="icon-people">'),
+            p_people = $('<p>').text(pgCon[0].container.people +'位閱讀人員'), 
+
+            p_icon_data = $('<p class="icon-data">'),
+            p_data = $('<p>').text(pgCon[0].container.remarks),
+                
+            div_location = $('<div class="detail-location">')
+                                .append(p_icon_location, p_location),
+            div_people = $('<div class="detail-people">')
+                                .append(p_icon_people, p_people),
+            div_detail = $('<div class="detail-subtitle">')
+                                .append(p_icon_data, p_data);
+
+        $('.m-content-detail').append(div_location, div_people,div_detail);
+
+        //m-content-status 發佈相關資訊
+        var p_s_people = $('<p class="status-people">').text(pgCon[0].container.name + '發佈,'+''),
+            p_s_remind = $('<p class="status-remind">').text(pgCon[0].container.remind+' ,'+''),
+            p_s_repeat = $('<p class="status-repeat">').text(pgCon[0].container.repeat + '重覆');
+
+        $('.m-content-status').append(p_s_people,p_s_remind,p_s_repeat);
+    }
+    // 彈窗消失
+    this.cf_chk_del = function(){
+        slideNav_bg.fadeOut();
+        del_win.addClass('none');
+    }
+    this.cf_chk_f = function(){
+        slideNav_bg.fadeOut();
+        fol_win.addClass('none');
+    }
+    // 點選彈窗BTN 判斷
+    this.cfClose = function(){
+        $('.cfwindow-btn').on('click','button',function(){
+            var attrClass = $(this).attr('class');
+            // 確定修改
+            // $this.cf_chk();
+            // $this.cf_chk_f();
+            if( attrClass === 'confirm'){
+                $this.cf_chk_del();
+                $this.cf_chk_f();
+            }else{
+                $this.cf_chk_del();
+                $this.cf_chk_f();
+            }
+        });
+    }
+    // 判斷右上 選擇
+    this.chang_value = function(){
+        $('#pgcontent-select').change(function(){
+            var select_val = $(this).val();
+            
+            console.log(select_val)
+
+            if(select_val === '修改'){
+                // 將資料帶入新增行程頁面
+                page = "add";
+                pg_chg_mc.add_goPage(page);
+
+            }else if( select_val === '刪除' ){
+                $('.delete-confirm-window').removeClass('none');
+                $('.slide-nav-bg').fadeIn();
+            }else if( select_val === '複製' ){
+                // 將資料帶入新增行程頁面
+                page = "add";
+                pg_chg_mc.add_goPage(page);
+
+            }else{
+                $('.folder-confirm-window').removeClass('none');
+                $('.slide-nav-bg').fadeIn();
+            }
+        });
+        // $('#pgcontent-select').val('新增').trigger('change');
+    }
+    //彈窗input勾選效果
+    this.inupt_chk = function(){
+        var confirmInput_delet = $('.delete-confirm-window input[type="checkbox"]');
+        confirmInput_delet.prop('checked',true).next('label').addClass('icon-tick');
+        confirmInput_delet.on('click',function(){
+            $(this).next().toggleClass('icon-tick')
+        });
+    }
+    //resize
+    this.re_window_mContent = function(){
+        var $m_conPage = $('.meeting-con-page'),
+            $re_height = $(window).height(),
+            $re_header = Math.ceil($('.top-menu').outerHeight()),
+            re_pageHeight = Math.ceil( $re_height - $re_header + 7);
+        
+        $m_conPage.css({'height': re_pageHeight}) 
+    }
+    this.init = function(){
+        $this.inupt_chk();
+        $this.cfClose();
+
+        $this.hasMsg();
+        $this.re_window_mContent();
+        $this.content_detail();
+        $this.chang_value();
+
+        $(window).resize(function(){
+            $this.re_window_mContent();
+        });
+    }
+    $this.init();
+}
+meetingRom_fn();
+</script>

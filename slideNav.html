@@ -1,0 +1,139 @@
+<!-- 側邊選單 -->
+<div class="slide-nav">
+    <div class="container">
+        
+        <div class="slideNav-top">
+            <div class="change-mode">
+                <button type="button" class="calendar-mode active">行事曆</button>
+                <button type="button" class="project-mode">專案管理</button>
+            </div>
+            <p>行事曆顯示分類篩選</p>
+            <div class="slideNav-top-btn">
+                <button type="button" name="" class="select-all">全選</button>
+                <button type="button" name="" class="unselect-all">全不選</button>
+            </div>
+        </div>
+        <div class="slideNav-content">
+            <form action=""></form>
+        </div>
+    </div>
+    <div class="slide-nav-btn clearfix">
+        <button type="button" name="" class="cancel">取消</button>
+        <button type="button" name="" class="confirm">確定</button>
+    </div>  
+</div>
+
+<script>
+$(function(){
+    
+});
+//分類行程按鈕
+var classifySelect = function(){
+    var chk,
+        $this = this,
+        slide_topBtn = $('.slideNav-top-btn');
+    var slideInput =  $('.slideNav-content input[type="checkbox"]');
+
+    //產出所有行程分類
+    this.classify_List = function(){
+        var scObj_len = Object.keys(addCon_obj).length;
+
+        for( var i=0; i < addCon_obj.slideContent.length; i++ ){
+            var _input = $('<input type="checkbox">')
+                            .attr('id','trip-input0'+ i)
+                            .addClass(addCon_obj.slideContent[i].Classtype),
+                _label = $('<label for="trip-input0'+ i +'">'),
+                _span  = $('<span>').text(addCon_obj.slideContent[i].type),
+                _div   = $('<div>');
+        
+            _div.append(_input,_label,_span);
+            $('.slideNav-content form').append(_div);
+        }
+    }
+    //click-全選或是全不選 按鈕時
+    this.chkBtn = function(){ 
+
+        slide_topBtn.on('click','button',function(){
+
+            slide_topBtn.children('button').removeClass('active');
+
+            var slideInput   = $('.slideNav-content input[type="checkbox"]'),
+                btnSelect    = $(this).attr('class'),
+                btnSelect_ac = $(this).hasClass('active');
+            
+            if( btnSelect === 'select-all'){      
+            
+                $(this).addClass('active');
+                $('.slideNav-content input[type="checkbox"]').prop('checked',true);
+                
+            }else if( btnSelect === 'unselect-all'){
+                
+                $(this).addClass('active');
+                $('.slideNav-content input[type="checkbox"]').prop('checked',false);
+                //預設請假、會議、活動、其他
+                $('.meeting,.activity,.leave,.other').prop('checked',true);
+            }
+        });
+    }
+    this.classify_height = function(){
+        var slide_nav_h    = $('.slide-nav').height(),
+            slideNav_top_h = $('.slideNav-top').height(),
+            nav_btn_h      = $('.slide-nav-btn').height(),
+            Sn_height      = slide_nav_h - slideNav_top_h - nav_btn_h;
+
+        $('.slideNav-content').css({
+            'margin-top':slideNav_top_h,
+            'height': Sn_height
+        });
+    }
+    this.topBtn = function(){
+        $('.change-mode button').on('click',function(){
+            var chkClass = $(this).attr('class');
+            $('.change-mode button').removeClass('active');
+            $(this).addClass('active');
+        });
+    }
+    this.init = function(){
+        $this.classify_height();
+        $this.chkBtn();   
+        $this.classify_List();
+        $this.topBtn();
+
+        $(window).resize(function(){
+            $this.classify_height();
+        });
+        
+    }
+    $this.init();
+} 
+var classify = new classifySelect();
+
+//側邊選單按鈕 顯示 & 隱藏
+var pageNav = function(){
+    var slideNav_box = $('.slide-nav'),
+        slideBg  = $('.slide-nav-bg');
+    var fn = {
+        //顯示
+        menu_out: function(){
+            slideBg.fadeIn();
+            slideNav_box.stop().animate({ 'left': 0 },500,'swing');
+        },
+        //隱藏
+        menu_in: function(){
+            slideBg.fadeOut();
+            slideNav_box.stop().animate({ 'left': '-75vmin' },500,'swing');
+        },
+        init: function(){
+            var _this = this;
+            Slider = _this.slideWeek;
+            //側邊選單內按鈕確定按鈕
+            $('.slide-nav-btn').on('click','button',function(){
+                _this.menu_in(); 
+            });
+        }
+    };
+    fn.init();
+    return fn;
+}
+var slideLeft = new pageNav();
+</script>

@@ -1,0 +1,148 @@
+<header class="folder-header">
+    <!-- 上方選單 -->
+    <div class="top-menu clearfix">
+        <div class="filter-box">
+            <div class="icon-filter-2"></div>
+            <div class="icon-filter-1"></div>
+        </div>
+        <!-- 標題 -->
+        <div class="folder-title">收藏與記錄</div>
+
+        <div class="search icon-search"></div>
+    </div>
+    <!-- 篩選區塊 -->
+</header>
+<!-- 底部選單 -->
+<footer class="clearfix">
+    <button type="button" class="calendarbtn active" id="calendar">
+        <span class="icon-btn-dayshow"></span>
+        <p>日顯示</p>
+    </button>
+    <button type="button" class="folderbtn" id="folder">
+        <span class="icon-btn-recode"></span>
+        <p>收藏與記錄</p>
+    </button>
+    <button type="button" class="addbtn icon-btn-add" id="add"></button>
+    <button type="button" class="settingbtn" id="setting">
+        <span class="icon-btn-setting"></span>
+        <p>設定</p>
+    </button>
+    <button type="button" class="inforbtn" id="infor">
+        <span class="icon-btn-msg"></span>
+        <p>動態消息</p>
+    </button>
+</footer>
+<div class="folder-page">
+
+    <!-- 上方區塊 -->
+    <div class="topBtn">
+        <button type="button" id="myfolder" class="btnstyle active">
+            <span class="icon-love"></span>
+            我的收藏紀錄
+        </button>
+        <button type="button" id=" myrecord" class="btnstyle">
+            <span class="icon-clock"></span>
+            我的預訂記錄
+        </button>
+    </div>
+
+    <!-- 內容區塊 -->
+    <div class="folder-content">
+        <ul></ul>  
+    </div>
+</div>
+
+<script>
+//搜尋功能 *****************************************************************************
+function search_btn(){
+
+    //搜尋功能 ************************************************************************
+    $('header .search').on('click', function () {        
+        searchFn();
+    });
+    //關閉搜尋page
+    $('a.cancel_btn').on('click', function () {
+        $('section.search_bar').fadeOut();
+        $('.result_tab,.record_tab ul').html(''); //關閉後 清空所有資料
+    });
+// *******************************************************************************
+}
+search_btn(); 
+var folderPage_fn = function(){
+    var $this = this;
+    //內容
+    this.folder_con = function(){
+        for( var i=0; i < pgCon.length; i++ ){
+            
+            // 子層框架 
+            // folder-recod-left 子層框架
+            var f_p01 = $('<p>').text(pgCon[i].typeName);
+            var f_icon = $('<div class="icon-type">').addClass(pgCon[i].classType).append(f_p01);
+            
+            // folder-recod-list 子層框架
+            var f_spanDay    = $('<span>').text(pgCon[i].day);
+            var f_spanWeek   = $('<span>').text(' '+'週'+ pgCon[i].week);
+            var folder_day   = $('<p class="folder-day">').append(f_spanDay, f_spanWeek);  
+            
+            var f_spanStime  = $('<span>').text(pgCon[i].starTime);
+            var f_spanEtime  = $('<span>').text(pgCon[i].endTime);
+            var folder_time  = $('<p class="folder-time">').append(f_spanStime, f_spanEtime);  
+            
+            var folder_theme = $('<p class="folder-theme">').text(pgCon[i].ordTitle);
+            
+            var f_spanIcon = $('<span class="icon-loction">');
+            var f_span01 = $('<span>').text(pgCon[i].r_location);
+            var f_span02 = $('<span>').text('於' + pgCon[i].f_keep +'收藏');
+            var folder_loaction = $('<p class="folder-loaction clearfix">').append(f_spanIcon, f_span01, f_span02);
+
+            // div外框架
+            var f_recodeList = $('<div class="folder-recod-list">').append(folder_day,folder_time,folder_theme,folder_loaction);
+            var f_recodeLeft = $('<div class="folder-recod-left">').append(f_icon, f_recodeList);
+            var f_recod      = $('<div class="folder-recod clearfix">').append(f_recodeLeft, '<button type="button" class="btn-delete">刪除</button>');
+            var folderWrap = $('<li>').append(f_recod);
+
+            $('.folder-content ul').append(folderWrap);
+        }
+    }
+    this.folderBox = function(){
+        var folder = $('.folder-recod');
+        folder.on("touchstart", function(e) {
+            startX = e.originalEvent.changedTouches[0].pageX;
+            startY = e.originalEvent.changedTouches[0].pageY;
+        });
+
+        folder.on("touchend", function(e) {         
+            moveEndX = e.originalEvent.changedTouches[0].pageX;
+            moveEndY = e.originalEvent.changedTouches[0].pageY;
+            X = moveEndX - startX;
+            Y = moveEndY - startY;
+            
+            //左滑
+            if ( Math.abs(X) > Math.abs(Y) && X > 0) {
+                $(this).stop().animate({ 'left': 0 },300);
+            
+            //右滑
+            }else if ( Math.abs(X) > Math.abs(Y) && X < 0 ) {
+                $(this).stop().animate({ 'left': '-22vw' },300);   
+            }
+        });
+    }
+    this.folder_btn = function(){
+        $('.topBtn button').on('click',function(){
+            var chk_class = $(this).attr('class');
+            $('.topBtn button').removeClass('active');
+            $(this).addClass('active')
+        });
+    }
+    this.init = function(){
+        pgTarget = $('.folder-content');
+        var re_size_folder = new re_window(pgTarget);
+        $this.folder_con();
+        $this.folderBox();
+        $this.folder_btn();
+    }
+    $this.init();
+}
+var folderFn = new folderPage_fn();
+
+</script>
