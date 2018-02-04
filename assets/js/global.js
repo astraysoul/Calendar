@@ -157,7 +157,7 @@ var pageChange_locat = function () {
     var $this = this;
     var page;
     this.goPage = function (page) {
-        var burl = 'http://' + location.hostname + 'page/';
+        var burl = 'http://' + location.hostname + '/page/';
         $.post(burl + page + '.html', {}, function (pg) {
             $('.page').html(pg);
             var preHref = burl + '#' + page;
