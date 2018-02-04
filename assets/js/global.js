@@ -95,87 +95,37 @@ var curr_numObj = {
           換頁區塊
 -----------------------------*/
 //側邊選單內容載入
-var pageSlide = function () {
-    var $this = this;
-    this.goPage = function (page) {
-        $.post('http://astraysoul.github.io/page/'+page + '.html', {}, function (pg) {
-            $('.slideNav').html(pg);
-        });
-    }
-    this.init = function () {
-        $this.goPage('slideNav');
-    }
-    $this.init();
-}
-pageSlide();
-
-// 頁面切換 - 存取瀏覽過的頁面資料
-var pageHistory = [];
-// 本機測試
-var pageChange_locat = function () {
-    var $this = this;
-    var page;
-    this.goPage = function (page) {
-        pageHistory.push(page)
-        $.post(page + '.html', {}, function (pg) {
-            $('.page').html(pg);
-        });
-    }
-    this.init = function () {
-        $this.goPage('calendar');
-
-        $('footer').on('click', 'button', function (event) {
-            var clss_type = $(this).attr('class')
-            //底部按鈕 判斷
-            if( clss_type === 'calendarbtn active' ){
-                $('.slide-nav-bg').fadeIn();
-            }
-            if( $(this).hasClass('calendarbtn active') ){
-                //日選單條件show
-                $('.slide-nav').fadeIn();
-                $('.calendar-box').stop().animate({ 'bottom': 0 },500,'swing');
-                return false;
-            }    
-            $(this).each(function(){
-                if( $('footer button').hasClass('active') ){
-                    $('footer button').removeClass('active') 
-                    $(this).addClass('active');
-                }
-            });
-            page = $(this).attr('id');
-            $this.goPage(page);
-        });
-
-    }
-    $this.init();
-}
-var pageCal = new pageChange_locat();
-
-// 線上測試
-// var pageChange_locat = function () {
-//     var pageHistory = {};
+// var pageSlide = function () {
 //     var $this = this;
-//     var page;
 //     this.goPage = function (page) {
-//         var burl = 'http://' + location.hostname + '/rex/calendar_mobile/';
-//         $.post(burl + page + '.html', {}, function (pg) {
-//             $('.page').html(pg);
-//             var preHref = burl + '#' + page;
-//             window.history.pushState({preHref: preHref}, 0, preHref);
+//         $.post('http://astraysoul.github.io/page/'+page + '.html', {}, function (pg) {
+//             $('.slideNav').html(pg);
 //         });
 //     }
 //     this.init = function () {
-//         //一開始要顯示的頁面
-//         if (location.hash) {
-//             hash = location.hash.slice(1);
-//             $this.goPage(hash);
-//         } else {
-//         	$this.goPage('calendar');
-//         }
+//         $this.goPage('slideNav');
+//     }
+//     $this.init();
+// }
+// pageSlide();
+
+// // 頁面切換 - 存取瀏覽過的頁面資料
+// var pageHistory = [];
+// // 本機測試
+// var pageChange_locat = function () {
+//     var $this = this;
+//     var page;
+//     this.goPage = function (page) {
+//         pageHistory.push(page)
+//         $.post(page + '.html', {}, function (pg) {
+//             $('.page').html(pg);
+//         });
+//     }
+//     this.init = function () {
+//         $this.goPage('calendar');
 
 //         $('footer').on('click', 'button', function (event) {
 //             var clss_type = $(this).attr('class')
-//             var page = $(this).attr('id');
 //             //底部按鈕 判斷
 //             if( clss_type === 'calendarbtn active' ){
 //                 $('.slide-nav-bg').fadeIn();
@@ -192,6 +142,7 @@ var pageCal = new pageChange_locat();
 //                     $(this).addClass('active');
 //                 }
 //             });
+//             page = $(this).attr('id');
 //             $this.goPage(page);
 //         });
 
@@ -199,6 +150,55 @@ var pageCal = new pageChange_locat();
 //     $this.init();
 // }
 // var pageCal = new pageChange_locat();
+
+// 線上測試
+var pageChange_locat = function () {
+    var pageHistory = {};
+    var $this = this;
+    var page;
+    this.goPage = function (page) {
+        var burl = 'http://' + location.hostname + '/astraysoul/page/';
+        $.post(burl + page + '.html', {}, function (pg) {
+            $('.page').html(pg);
+            var preHref = burl + '#' + page;
+            window.history.pushState({preHref: preHref}, 0, preHref);
+        });
+    }
+    this.init = function () {
+        //一開始要顯示的頁面
+        if (location.hash) {
+            hash = location.hash.slice(1);
+            $this.goPage(hash);
+        } else {
+        	$this.goPage('calendar');
+        }
+
+        $('footer').on('click', 'button', function (event) {
+            var clss_type = $(this).attr('class')
+            var page = $(this).attr('id');
+            //底部按鈕 判斷
+            if( clss_type === 'calendarbtn active' ){
+                $('.slide-nav-bg').fadeIn();
+            }
+            if( $(this).hasClass('calendarbtn active') ){
+                //日選單條件show
+                $('.slide-nav').fadeIn();
+                $('.calendar-box').stop().animate({ 'bottom': 0 },500,'swing');
+                return false;
+            }    
+            $(this).each(function(){
+                if( $('footer button').hasClass('active') ){
+                    $('footer button').removeClass('active') 
+                    $(this).addClass('active');
+                }
+            });
+            $this.goPage(page);
+        });
+
+    }
+    $this.init();
+}
+var pageCal = new pageChange_locat();
 
 // 日顯示條件點選時，重新抓取上方日期
 var btn_cag = function(btn_name){           
