@@ -98,7 +98,7 @@ var curr_numObj = {
 var pageSlide = function () {
     var $this = this;
     this.goPage = function (page) {
-        $.post(astraysoul.github.io/page/page + '.html', {}, function (pg) {
+        $.post('http://astraysoul.github.io/page/'+page + '.html', {}, function (pg) {
             $('.slideNav').html(pg);
         });
     }
