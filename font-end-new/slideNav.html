@@ -24,27 +24,87 @@
 </div>
 
 <script>
-$(function(){
-    
-});
+//側邊選單按鈕 顯示 & 隱藏
+ var typeList = json_decode('{slideContent}');
+ var cusObj = json_decode('{personalize}');
+
+var pageNav = function(){
+    var slideNav_box = $('.slide-nav'),
+        slideBg  = $('.slide-nav-bg'),
+        s_item = [],
+        send = {};
+    var fn = {
+        //顯示
+        menu_out: function(){
+            slideBg.fadeIn();
+            slideNav_box.stop().animate({ 'left': 0 },500,'swing');
+        },
+        //隱藏
+        menu_in: function(){
+            slideBg.fadeOut();
+            slideNav_box.stop().animate({ 'left': '-75vmin' },500,'swing');
+        },
+        get_input: function(){
+            
+            $('.slideNav-content input[type="checkbox"]:checked').each(function(){
+                var s_item = [];
+                var _id    = $(this).attr('data_id');
+                var _class = $(this).attr('class');
+                var _text  = $(this).next().next().text();
+                $all = {"type": _text,"Classtype": _class,"id_type":_id};
+                s_item.push($all);
+                send[_id] = s_item; 
+            });
+        },
+        init: function(){
+            var _this = this;
+            Slider = _this.slideWeek;
+            //側邊選單內按鈕確定按鈕
+            $('.slide-nav-btn .confirm').on('click',function(){
+                _this.get_input();
+                _this.menu_in(); 
+            });
+            $('.slide-nav-btn .cancel').on('click',function(){
+                
+                _this.menu_in(); 
+            });
+        }
+    };
+    fn.init();
+    return fn;
+}
+var index_Left = new pageNav();
+
+
 //分類行程按鈕
 var classifySelect = function(){
     var chk,
         $this = this,
         slide_topBtn = $('.slideNav-top-btn');
     var slideInput =  $('.slideNav-content input[type="checkbox"]');
-
+   
     //產出所有行程分類
     this.classify_List = function(){
-        var scObj_len = Object.keys(addCon_obj).length;
-
-        for( var i=0; i < addCon_obj.slideContent.length; i++ ){
-            var _input = $('<input type="checkbox">')
-                            .attr('id','trip-input0'+ i)
-                            .addClass(addCon_obj.slideContent[i].Classtype),
-                _label = $('<label for="trip-input0'+ i +'">'),
-                _span  = $('<span>').text(addCon_obj.slideContent[i].type),
+        $('.slideNav-content form').html('');
+        var num = 0;
+        for(var i in typeList){
+            var item = typeList[i];
+            num ++ ;
+            var _input = $('<input type="checkbox">').addClass(item.Classtype).attr('data_id',item.id).attr('id','a'+ num),
+                _label = $('<label for="a'+ num +'">'),
+                _span  = $('<span>').text(item.name),
                 _div   = $('<div>');
+
+             for(var j in cusObj["type_search"]){
+                var tag_item = cusObj["Tag"][j];
+
+                if(item.id == tag_item.id_type){
+                    var _input = $('<input type="checkbox">').addClass(item.Classtype).attr('data_id',item.id).attr('id','a'+ num),
+                        _label = $('<label for="a'+ num +'">'),
+                        _span  = $('<span>').text(item.name),
+                        _div   = $('<div>');
+                }
+             }
         
             _div.append(_input,_label,_span);
             $('.slideNav-content form').append(_div);
@@ -95,9 +155,10 @@ var classifySelect = function(){
     }
     this.init = function(){
         $this.classify_height();
-        $this.chkBtn();   
         $this.classify_List();
+        $this.chkBtn();   
         $this.topBtn();
+        
 
         $(window).resize(function(){
             $this.classify_height();
@@ -108,32 +169,5 @@ var classifySelect = function(){
 } 
 var classify = new classifySelect();
 
-//側邊選單按鈕 顯示 & 隱藏
-var pageNav = function(){
-    var slideNav_box = $('.slide-nav'),
-        slideBg  = $('.slide-nav-bg');
-    var fn = {
-        //顯示
-        menu_out: function(){
-            slideBg.fadeIn();
-            slideNav_box.stop().animate({ 'left': 0 },500,'swing');
-        },
-        //隱藏
-        menu_in: function(){
-            slideBg.fadeOut();
-            slideNav_box.stop().animate({ 'left': '-75vmin' },500,'swing');
-        },
-        init: function(){
-            var _this = this;
-            Slider = _this.slideWeek;
-            //側邊選單內按鈕確定按鈕
-            $('.slide-nav-btn').on('click','button',function(){
-                _this.menu_in(); 
-            });
-        }
-    };
-    fn.init();
-    return fn;
-}
-var slideLeft = new pageNav();
+
 </script>

@@ -1,0 +1,317 @@
+<header class="setting-header">
+    <div class="top-menu">
+        <div class="setting-title">行事曆設定</div>
+    </div>
+</header>
+<div class="setting-page">
+    <!-- 行事曆推播通知 -->
+    <div class="push-msg clearfix">
+        <div class="title">行事曆推播通知</div>
+        <div class="switch-box">
+            <div class="circle"></div>
+        </div>
+    </div>
+
+    <!-- 調整預設標籤 -->
+    <div class="default-tag clearfix">
+        <div class="title">調整預設標籤</div>
+        <button type="button" class="tag-btn" onclick="slideLeft.menu_out()">編輯</button>
+        <div class="tag-content">
+            <span class="text01">預設 :</span>
+        </div>
+    </div>
+
+    <!-- 選擇節慶顯示國家 -->
+    <div class="festival-country none">
+        <div class="title">選擇節慶顯示國家</div>
+        <div class="festival-tw">
+            <input type="checkbox" id="tw" >
+            <label for="tw"></label>
+            <span>台灣</span>
+        </div>
+        <div class="festival-china">
+            <input type="checkbox" id="china" >
+            <label for="china"></label>
+            <span>中國</span>
+        </div>
+    </div>
+</div>
+<!-- 底部選單 -->
+<footer class="clearfix">
+    <button type="button" class="calendarbtn active" id="calendar">
+        <span class="icon-btn-dayshow"></span>
+        <p>日顯示</p>    
+    </button>
+    <button type="button" class="folderbtn" id="folder">
+        <span class="icon-btn-recode"></span>
+        <p>收藏與記錄</p>    
+    </button>
+    <button type="button" class="addbtn icon-btn-add" id="add"></button>
+    <button type="button" class="settingbtn" id="setting">
+        <span class="icon-btn-setting"></span>
+        <p>設定</p>    
+    </button>
+    <button type="button" class="inforbtn" id="infor">
+        <span class="icon-btn-msg"></span>
+        <p>動態消息</p>    
+    </button>
+</footer>
+
+<!-- 半透黑背景 -->
+<div class="slide-nav-bg"></div>
+
+<!-- 側邊選單 -->
+<div>
+    <div class="setting-slide-nav">
+        <div class="container">
+            <div class="slideNav-top">
+                <p>請選擇您想出現在</p>
+                <p>行事曆上的 <span>分類行程</span> </p>
+                <div class="slideNav-top-btn">
+                    <button type="button" name="" class="select-all">全選</button>
+                    <button type="button" name="" class="unselect-all">全不選</button>
+                </div>
+            </div>
+            <div class="slideNav-content">
+                <form action="" id="s_type"></form>
+            </div>
+        </div>
+        <div class="slide-nav-btn clearfix">
+            <button type="button" name="" class="cancel">取消</button>
+            <button type="button" name="" class="confirm">確定</button>
+        </div>  
+    </div>
+</div>
+
+<script>
+$(function(){
+    pgTarget = $('.setting-page');
+    var re_size_infor = new re_window_other(pgTarget);
+});
+
+var typeList = json_decode('{slideContent}');
+var cusObj = json_decode('{personalize}');
+//側邊選單按鈕 顯示 & 隱藏
+var pageNav = function(){
+    var slideNav_box = $('.setting-slide-nav'),
+        slideBg      = $('.setting-slide-nav .slide-nav-bg'),
+        send = {},
+        s_item = [];
+    var fn = {
+        //顯示
+        menu_out: function(){
+            $('.slide-nav-bg').fadeIn();
+            slideNav_box.stop().animate({ 'left': 0 },500,'swing');
+
+            for(i in cusObj['Tag']){
+                $('.slideNav-items label input[data_id="'+cusObj['Tag'][i].id_type+'"]').prop('checked',true)
+            }
+        },
+        //隱藏 (按取消)
+        menu_in: function(){
+            $('.slide-nav-bg').fadeOut();
+            slideNav_box.stop().animate({ 'left': '-75vmin' },500,'swing');
+            $('.slideNav-items label input[type="checkbox"]').prop('checked',false)
+            for(i in cusObj['Tag']){
+                $('.slideNav-items label input[data_id="'+cusObj['Tag'][i].id_type+'"]').prop('checked',true)
+            }
+        },
+        get_input: function(){
+            cusObj['Tag'] = {}; //清空cusOBJ物件
+            $('.slideNav-items label input[type="checkbox"]:checked').each(function(){
+                s_item = [];
+                var _id    = $(this).attr('data_id');
+                var _class = $(this).attr('class');
+                var _text  = $(this).next().text();
+                $all = {"type": _text,"Classtype": _class,"id_type":_id};
+                s_item.push($all);
+                send[_id] = s_item;
+                cusObj['Tag'][_id] = $all;
+            });
+
+            sendfun.post(burl+"change_personalize",{'type':send},{
+                onSuccess : function(res){
+                    if(res.code === '100'){ 
+                        fn.default_tag();
+                    }else{
+                        console.log('err');
+                    }                    
+                },
+                onFail: function(res){
+                    console.log('res',res);
+                    popup.alert("編輯預設行程類別失敗", res.msg || false, function(){
+                        //window.location.reload();
+                    });
+                }
+            }); 
+        },
+        settingBtn: function(){
+            var _this = this;
+            //側邊選單內按鈕確定按鈕
+            $('.slide-nav-btn .confirm').on('click',function(){
+                var typeLength = 0; //判斷至少要選擇一個item (防呆設計) -- 判斷有無點選數量
+                $('#s_type input[type="checkbox"]').each(function(){
+                    if($(this).prop('checked')){
+                        typeLength += 1;
+                    }
+                })
+                if(!typeLength){
+                    alert('至少須選擇一個分類')
+                    return;
+                }else{
+                    _this.get_input();
+                }
+                _this.menu_in(); 
+            });
+            $('.slide-nav-btn .cancel').on('click',function(){
+                // classify.setting_cf_List();
+                _this.menu_in(); 
+            });
+            $('.slide-nav-bg').on('click',function(){
+                _this.menu_in();
+            });
+        },
+        default_tag: function(){
+            var text=[];
+            for( var i in cusObj["Tag"]){
+                var item = cusObj["Tag"][i];
+                text.push(item.type);
+            }
+            text = text.join('、');
+            $('.tag-content .text02').html(text);
+        },
+        init: function(){
+            var _this = this;
+            Slider = _this.slideWeek;
+            _this.settingBtn();
+
+            //推播通知
+            if(cusObj["pushVal"]){
+                $('.switch-box').addClass('active');
+            }
+        }
+    };
+    fn.init();
+    return fn;
+}
+var slideLeft = new pageNav();
+
+var set_pageFn = function(){
+    var $this = this;
+
+    this.default_tag = function(){
+        var text=[],
+            tagSpan
+        for( var i in cusObj["Tag"]){
+            var item = cusObj["Tag"][i];
+            // 判斷陣列是否是最後一個，是的話就刪掉分號
+            text.push(item.type);
+        }
+        text = text.join('、');
+        tagSpan = $('<span>').addClass('text02').html(text);
+        $('.tag-content').append(tagSpan);
+    }
+    // 推播通知 
+    this.push_btn = function(){
+        $('.circle').on('click',function(){
+            $(this).parent().toggleClass('active');
+            var hasClass = $('.switch-box').hasClass('active'),
+                push;
+            hasClass === true ? push = 1 : push = 0;
+            //更改個人預設值
+            sendfun.post(burl+"change_personalize",{'push':push},{
+                onSuccess : function(res){
+                    if(res.code === '100'){
+                    }else{
+                        console.log('err');
+                    }                    
+                },
+                onFail: function(res){
+                    popup.alert("變更推播通知失敗", res.msg || false, function(){
+                        window.location.reload();
+                    });
+                }
+            }); 
+        });
+    }
+    this.init = function(){
+
+        $this.default_tag();
+        $this.push_btn();
+    }
+    $this.init();
+}   
+var settingFn = new set_pageFn();
+
+//分類行程按鈕
+var classifySelect = function(){
+    var chk,
+        $this        = this,
+        slide_topBtn = $('.slideNav-top-btn');
+    var slideInput   = $('.slideNav-content input[type="checkbox"]');
+
+    // //產出所有行程分類
+    this.setting_cf_List = function(){
+        $('.slideNav-content form').html('');
+        var num = 0;
+        for(var i in typeList){
+            var item = typeList[i];
+            num ++ ;
+            var items = $('<div/>').addClass('slideNav-items'),
+                _label = $('<label/>').addClass(item.Classtype),
+                _input = $('<input/>').attr({"type":"checkbox","id":"a" + num,"data_id":item.id}).addClass(item.Classtype),
+                _txt = $('<span/>').html(item.name);
+
+                _label.append(_input,_txt);
+                items.append(_label);
+           $('.slideNav-content form').append(items);
+        }
+    }
+    //click-全選或是全不選 按鈕時
+    this.chkBtn = function(){ 
+        slide_topBtn.on('click','button',function(){
+
+            slide_topBtn.children('button').removeClass('active');
+
+            var slideInput   = $('.slideNav-content input[type="checkbox"]'),
+                btnSelect    = $(this).attr('class'),
+                btnSelect_ac = $(this).hasClass('active');
+            
+            if( btnSelect === 'select-all'){      
+                $(this).addClass('active');
+                $('.slideNav-content input[type="checkbox"]').prop('checked',true);
+                
+            }else if( btnSelect === 'unselect-all'){
+                $(this).addClass('active');
+                $('.slideNav-content input[type="checkbox"]').prop('checked',false);
+                //預設請假、會議、活動、其他
+                $('.meeting,.activity,.leave,.other').prop('checked',true);
+            }
+        });
+    }
+    this.classify_height = function(){
+        var win_h       = $(window).height();
+        var slide_nav_h    = $('.setting-slide-nav').height(),
+            slideNav_top_h = $('.setting-slide-nav .slideNav-top').outerHeight();
+            nav_btn_h      = $('.setting-slide-nav .slide-nav-btn').height(),
+            Sn_height      = slide_nav_h - slideNav_top_h - nav_btn_h;
+
+        $('.setting-slide-nav .slideNav-content').css({
+            'margin-top':slideNav_top_h,
+            'padding-bottom': Math.ceil(nav_btn_h),
+            'height': Math.ceil(win_h) - Math.ceil(slideNav_top_h)
+        });
+        $('.slide-nav').height(win_h);
+    }
+    this.init = function(){
+        $this.chkBtn();   
+        $this.setting_cf_List();
+        $this.classify_height();
+        $(window).resize(function(){
+            $this.classify_height();
+        });
+    }
+    $this.init();
+} 
+var classify = new classifySelect();
+</script>

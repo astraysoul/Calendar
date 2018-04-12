@@ -1,18 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>行事曆</title>
-    <link rel="stylesheet" href="assets/js/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/reset.css">
-    <link rel="stylesheet" href="assets/css/custom.css">
-    <script src="assets/js/js.js"></script>
-</head>
-<body>
-   <header class="overview-header">
+    <header class="overview-header">
         <!-- 上方選單 -->
         <div class="top-menu clearfix">
             <div class="overview-back icon-arrow"></div>
@@ -73,7 +59,7 @@
     </div>
     <div class="overview-btn clearfix">
         <button type="button" name="" class="cancel">取消</button>
-        <button type="button" name="" class="confirm">預約</button>
+        <button type="button" name="" class="confirm reservation"></button>
     </div>
 
     <!-- 可重複預約 彈跳視窗 -->
@@ -88,7 +74,7 @@
     </div>
 
     <!-- 某時間已被他人預約 彈跳視窗 -->
-    <div class="fail-confirm-window ">
+    <div class="fail-confirm-window none">
         <div class="title">
         </div>
         <div class="cfwindow-btn clearfix">
@@ -99,14 +85,30 @@
     </div>
 
     <div class="slide-nav-bg"></div>
-</body>
-<script src="assets/js/jquery-3.2.1.min.js"></script>
-<script src="assets/js/jquery.touchwipe.js"></script>
-<script src="assets/js/bootstrap/js/bootstrap.min.js"></script>
-<script src="assets/js/jquery.hashchange.js"></script>
-<script src="assets/js/global.js"></script>
 
 <script>
+    var date = '';
+
+    post_data = '{post_data}'; /* 解析新增行程字串 */
+    data_str  = post_data.split("&");
+    data_len  = data_str.length;
+
+    for (var i = 0; i < data_len; i++) {
+        schedule_data = data_str[i].split("=");
+
+        temp[schedule_data[0]] = schedule_data[1]
+    }
+    console.log(temp)
+
+    /* 判斷是新增 或是 修改 */
+    if(temp.type == 'post_data') {
+        $('.reservation').text('預約');
+    } else if(temp.type == 'edit_data') {
+        $('.reservation').text('修改預約');
+    } else {
+        $('.reservation').text('預約');
+    }
+
     // 抓當天日期
     var ov_today = function () {
         var Month_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -116,13 +118,14 @@
         var ov_dayClass;
         var ov_slideType;
         var moveNum;
+        dayObj = json_decode('{day_of_year}');
         this.now_Month = function(){
             //遍歷該年的月份
             for (var i in dayObj) {
                 var monthNum = $('<ul class="clearfix">').attr('data-day', i), // 獲取該月第一天的星期
                     f_week   = Object.values(dayObj[i])[0].week,  // 比對星期幾
                     space    = Month_EN.indexOf(f_week);           // 再對照英文日期
-              
+
                 // 填充前面格數
                 for (var j = 0; j < space; j++) {
                     monthNum.append('<li></li>');
@@ -133,63 +136,73 @@
                     monthNum.append(dayNum);
                     // console.log(dayObj[i][k].date)
                 }
-                // 產外層UL月份    
+                // 產外層UL月份
                 $('.data-list').append(monthNum)
                 // return false; // 指產一個月
             }
-            //上方年份與月份 
-            $('.overview-today .this-month').text($year + '年 ' + $month + '月 ' + $day + '日');   
+            //上方年份與月份
+            $('.overview-today .this-month').text($year + '年 ' + $month + '月 ' + $day + '日');
+
+            /* 從行程開始時間 傳過來的日期 月份 */
+            if(temp.reservation_date) {
+                $month = temp.reservation_date.substr(5, 2);
+            }
+
+            if(temp.start_time) {
+                $month = temp.start_time.substr(5, 2);
+            }
 
             // 顯示當月
             $('.data-list ul').hide().removeClass('active');
             $('.data-list ul').eq(parseInt($month)-1).show().addClass('active');
-            
+
+
             // 找尋月份&當日
-            var str = parseInt($month) - 1; 
+            var str = parseInt($month) - 1;
             var li_each = $('.data-list ul').eq(str);
             var data_day = li_each.attr('data-day');
-    
+
             $('ul[data-day="'+ data_day +'"] li').each(function(){
                 var getClass = $(this).attr('class');
-                if( getClass !== undefined ){     
+                if( getClass !== undefined ){
                     var getday = getClass.substr(0,2);
                     var string_Day;
                     $day <= 9 ? string_Day = 0 + String($day):string_Day = String($day);
                     if( getday === string_Day){ $(this).addClass('today')}
                 }
-            });      
+            });
         }
         // 上方點選下拉區塊-月曆滑動效果
         this.touch_move = function () {
             var dataLi_ul = $('.data-list ul');
-            
+
             // 抓取當月，並為下方滑動基準值
             moveNum = parseInt($month)-1;
             dataLi_ul.touchwipe({
                 //wipeLeft 向左滑動
                 wipeLeft: function () {
-                    console.log('向左滑動')
-                    console.log('left',moveNum)
                     if (moveNum < 11) {
                         moveNum += 1;
                         dataLi_ul.hide().removeClass('active');
                         dataLi_ul.eq(moveNum).show().addClass('active');
+                        $this.dataList_Ul();
                     } else if (moveNum === 11) {
                         moveNum = 11;
+                        $this.dataList_Ul();
                         return;
                     }
                     $this.chgDay();
                 },
                 //wipeRight 向右滑動
                 wipeRight: function () {
-                    console.log('向右滑動')
-                    console.log('right',moveNum)
                     if (moveNum > 0) {
                         moveNum -= 1;
                         $('.data-list ul').hide().removeClass('active');
                         $('.data-list ul').eq(moveNum).show().addClass('active');
+                        $this.dataList_Ul();
                     } else if (moveNum === 0) {
                         moveNum = 0;
+                        $this.dataList_Ul();
                         return;
                     }
                     $this.chgDay();
@@ -203,11 +216,9 @@
         }
         // 上方點選下拉區塊-月曆高度
         this.dataList_Ul = function () {
-            var ulList_w   = $('.data-list ul').outerWidth(),
-                liList_h   = $('.data-list ul li').outerHeight(),
-                dataWrap_h = $('.dateWrap').outerHeight(),
-                dataList_h = $('.data-list ul').outerHeight();
-            $('.top-monthBox').height(dataWrap_h + dataList_h);
+            var dataWrap_h = $('.dateWrap').height(),
+                dataList_h = $('.data-list ul.active').height();
+            $('.top-monthBox').height(dataWrap_h + dataList_h + 20);
         }
         //上方點選下拉區塊-滑動月曆時，同步上方顯示
         this.chgDay = function () {
@@ -229,59 +240,98 @@
         // 月曆點選日期
         this.dayClick = function(){
             var dataLi = $('.data-list li');
+
+            /* 日期 勾選 如有預約日期 */
+            if(temp.reservation_date) {
+                year  = temp.reservation_date.substr(0, 4);
+                month = temp.reservation_date.substr(5, 2);
+                day   = temp.reservation_date.substr(8, 10);
+
+                $('.data-list ul').each(function(key, element) {
+                    if(temp.reservation_date) {
+                        res_day       = temp.reservation_date.substr(0, 7);
+                        res_day_empty = res_day.replace('-','');
+
+                        data_day = element.getAttribute('data-day');
+                        if(data_day == data_day) {
+                            res_date = temp.reservation_date.substr(8, 10);
+
+                            $('.'+res_date+'-d').addClass('active');
+                        }
+                    }
+                });
+                $('.overview-today .this-month').text( year+'年'+ ' ' +month+'月'+ ' ' +day+'日' );
+            }
+
+            if(temp.start_time) {
+                year  = temp.start_time.substr(0, 4);
+                month = temp.start_time.substr(5, 2);
+                day   = temp.start_time.substr(8, 10);
+
+                $('.data-list ul').each(function(key, element) {
+                    if(temp.start_time) {
+                        res_day       = temp.start_time.substr(0, 7);
+                        res_day_empty = res_day.replace('-','');
+
+                        data_day = element.getAttribute('data-day');
+                        if(data_day == data_day) {
+                            res_date = temp.start_time.substr(8, 10);
+
+                            $('.'+res_date+'-d').addClass('active');
+                        }
+                    }
+                });
+                $('.overview-today .this-month').text( year+'年'+ ' ' +month+'月'+ ' ' +day+'日' );
+            }
+
+
             $('.data-list ul li').on('click', function () {
-                
-                ov_dayClass   = $(this).attr('class');
+                ov_dayClass   = $(this).attr('class'); /* 取得日期 */
                 ov_monthClass = $(this).parent().attr('data-day');
-                var getDay   = ov_dayClass.substr(0,2); 
-                var getMonth = ov_monthClass.substr(4,2);
+
+                getDay   = ov_dayClass.substr(0,2);
+                getMonth = ov_monthClass.substr(4,2);
 
                 $('.data-list ul li.active').removeClass('active');
+
                 // 若是點選到當日，就不加CLASS
                 var chkToday = $(this).hasClass('today');
-                if (!chkToday) { $(this).addClass('active');}
+                if (!chkToday) {
+                    $(this).addClass('active');
+                }
 
                 ovchk = false;
                 $this.ov_today_fn(false);
                 $('.overview-today input[type="checkbox"]').prop('checked',false)
                 $('.overview-today .this-month').text( $year+'年'+ ' ' +getMonth+'月'+ ' ' +getDay+'日' );
-                
+
                 //數字轉字串
-                var getYear = String($year)
-                console.log(typeof getYear,getYear)    //當年
-                console.log(typeof getMonth,getMonth) //選擇的月份
-                console.log(typeof getDay,getDay)   //選擇的日期  
+                getYear = String($year);
+                date = getYear+'-'+getMonth+'-'+getDay;  /* yyyy-mm-dd */　
+                oc_content.init(date);
             });
         }
         //ovchk
         this.ov_today_fn = function (ovchk) {
             if (ovchk === true) {
-                $('.top-monthBox').stop().animate({'top': '11vmin'});
+                $('.top-monthBox').stop().animate({'top': '17vmin'});
                 $('.fixed-bottom-wrap').stop().animate({'top': '33vmin'});
             } else {
-                $('.top-monthBox').stop().animate({ 'top': '-45vmin'});
+                $('.top-monthBox').stop().animate({ 'top': '-50vmin'});
                 $('.fixed-bottom-wrap').stop().animate({'top': '0.4vmin'});
             }
-        }
-        // 上方點選下拉區塊-月曆高度
-        this.dataList_Ul = function () {
-            var ulList_w   = $('.data-list ul').outerWidth(),
-                liList_h   = $('.data-list ul li').outerHeight(),
-                dataWrap_h = $('.dateWrap').outerHeight(),
-                dataList_h = $('.data-list ul').outerHeight();
-            $('.top-monthBox').height(dataWrap_h + dataList_h);
         }
         this.init = function(){
             $this.now_Month();
             $this.touch_move();
-            $this.chgDay(); 
+            $this.chgDay();
             $this.chk();
             $this.dataList_Ul();
             $this.dayClick();
             $(window).resize(function(){
                 $this.dataList_Ul();
             });
-            
+
         }
         $this.init();
     }
@@ -289,15 +339,12 @@
 
     // 產出所有表格內容
     var ov_con = function () {
-        var $this       = this,
-            time_length = ov_obj[0].time_block.length,
-            top_length  = ov_obj.length,
-            left_length = time_length,
-            right_content;
+        var $this       = this;
 
+        /* 預約資料 */
         this.hasRes = function () {
             // 抓取 has_reserved = 已被預約 ,如果 has_reserved = true 時
-            // 該時間的li 新增樣式 class="reserved" 文字 '已被預約' 
+            // 該時間的li 新增樣式 class="reserved" 文字 '已被預約'
             // 抓取 reserved_myself = 您已預約 ,如果 reserved_myself = true 時
             // 該時間的li 新增樣式 class="your-reserved" 文字 '您已預約'
             for (var k = 0; k < top_length; k++) {
@@ -307,13 +354,13 @@
                         re_my   = String(ov_obj[k].time_block[g].reserved_myself),
                         re_name = String(ov_obj[k].time_block[g].reserved_name);
 
-                    if (has_re === 'true') {
+                    if (has_re == '1') {
                         $('.fixed-bottom-right ul').eq(k)
                             .find('li').eq(g)
                             .addClass('reserved')
                             .text('已被預約' + re_name);
 
-                    } else if (re_my === 'true') {
+                    } else if (re_my == '1') {
                         $('.fixed-bottom-right ul').eq(k)
                             .find('li').eq(g)
                             .addClass('your-reserved')
@@ -322,7 +369,7 @@
                 }
             }
         }
-        // 將li新增CLASS
+        /* 旁邊預約時間 add class*/
         this.li_addClass = function () {
             for (var k = 0; k < top_length; k++) {
                 for (var g = 0; g < left_length; g++) {
@@ -331,11 +378,12 @@
                 }
             }
         }
-        // 下方右邊內容
+        /* 下方中間表格 */
         this.btm_right_container = function () {
-            // 畫表格
+            /* 上方 */
             for (var k = 0; k < top_length; k++) {
                 right_content += '<ul>';
+                /* 左方 */
                 for (var g = 0; g < left_length; g++) {
                     right_content += '<li></li>';
                 }
@@ -343,7 +391,7 @@
             }
             $('.fixed-bottom-right').append(right_content);
         }
-        // 上方會議室欄位
+        /* 上方會議室欄位 */
         this.top_right_container = function () {
             for (var i = 0; i < ov_obj.length; i++) {
                 var right_li_p01 = $('<p>').text(ov_obj[i].type),
@@ -353,9 +401,10 @@
 
                 $('.fixed-top-right ul').append(top_right_li);
                 $('.fixed-bottom-right ul').eq(i).attr('data-name', ov_obj[i].type);
+                $('.fixed-bottom-right ul').eq(i).attr('data-id', ov_obj[i].id);
             }
         }
-        // 下方左邊時間
+        /* 左邊時間 */
         this.btm_left_container = function () {
             for (var j = 1; j < time_length; j++) {
                 var $time           = ov_obj[0].time_block[j].time,
@@ -366,12 +415,51 @@
                 $('.fixed-bottom-left ul').append(bottom_left_li);
             }
         }
-        this.init = function () {
-            $this.btm_right_container();
-            $this.top_right_container();
-            $this.btm_left_container();
-            $this.li_addClass();
-            $this.hasRes();
+        this.init = function (date) {
+            /* 如有傳預約時間 */
+            if(temp.reservation_date) {
+                date = temp.reservation_date;
+            }
+
+            if(temp.start_time) {
+                date = temp.start_time;
+            }
+
+            sendfun.post(burl + 'page_load/reservation/list', {date:date}, {
+                onSuccess: function(res){
+                    ov_obj = res.list;
+                    time_length = ov_obj[0].time_block.length;
+                    top_length  = ov_obj.length;
+                    left_length = time_length;
+                    right_content = '';
+
+                    $('.fixed-bottom-right').empty();   /* 中間表格清空 */
+                    $('.fixed-bottom-left ul').empty(); /* 左邊時間清空 */
+                    $('.fixed-top-right ul').empty();   /* 上方會議室清空 */
+
+                    $this.btm_right_container();  /* 下方中間表格 */
+                    $this.top_right_container();  /* 會議室欄位 */
+                    $this.btm_left_container();   /* 左邊時間 */
+                    $this.li_addClass();          /* 旁邊預約時間 add class*/
+                    $this.hasRes();               /* 預約資料 */
+
+                    ovSlide.init();
+                    ov_resize.init();
+                    ov_liJug.init();
+                },
+                onFail: function(res){
+                   popup.alert(res.title, res.msg);
+                }
+            });
+
+            /* 刪除陣列值 */
+            if(temp.reservation_date) {
+                delete temp.reservation_date;
+            }
+
+            if(temp.start_time) {
+                delete temp.start_time;
+            }
         }
         $this.init();
     }
@@ -450,6 +538,55 @@
                     }
                 }
             });
+
+            $('.overview-page').touchwipe({
+                wipeLeft: function() {
+                    // 上方slide
+                    var liLeft = parseFloat(slide_top.css('left')), // 將當下 left 值，存在變數
+                        liLeng = selfLi.length - 5,
+                        lastLi = Math.ceil(liLeng * liWidth * 1000) / 1000;
+
+                    // 下方slide
+                    var ulLeft = parseFloat(slide_btm.css('left')),
+                        newUl  = selfUl.length - 5;
+
+                    // 判斷當前 lenght = 5時，就不讓他滑動
+                    if (liCount === 5 || UlCount === 5) {
+                        slide_top.not(':animated').stop().animate({ left: 0 }, speed);
+                        slide_btm.not(':animated').stop().animate({ left: 0 }, speed);
+
+                    } else if (liLeft === -lastLi) {
+                        slide_top.not(':animated').stop().animate({ left: -lastLi }, speed);
+                        slide_btm.not(':animated').stop().animate({ left: -lastLi }, speed);
+
+                    } else {
+                        slide_top.not(':animated').stop().animate({ left: '-=' + liWidth }, speed);
+                        slide_btm.not(':animated').stop().animate({ left: '-=' + UlWidth }, speed);
+                    }
+                },
+                wipeRight: function() {
+                    // 上方slide
+                    var liLeft = parseFloat(slide_top.css('left')), // 將當下 left 值，存在變數
+                        liLeng = selfLi.length - 5,
+                        lastLi = Math.ceil(liLeng * liWidth * 1000) / 1000;
+
+                    // 下方slide
+                    var ulLeft = parseFloat(slide_btm.css('left')),
+                        newUl  = selfUl.length - 5,
+                        lastUl = newUl * UlWidth;
+
+                    if (liLeft === 0 || ulLeft === 0) {
+                        slide_top.not(':animated').stop().animate({ left: 0 }, speed);
+                        slide_btm.not(':animated').stop().animate({ left: 0 }, speed);
+                    } else {
+                        slide_top.not(':animated').stop().animate({ left: '+=' + liWidth }, speed);
+                        slide_btm.not(':animated').stop().animate({ left: '+=' + UlWidth }, speed);
+                    }
+                },
+                min_move_x: 20,
+                min_move_y: 20,
+                preventDefaultEvents: false
+            });
         }
         this.init = function () {
             $this.ov_move();
@@ -457,7 +594,6 @@
                 $this.ov_move();
             });
         }
-        $this.init();
     }
     var ovSlide = new ov_slidefn();
 
@@ -466,27 +602,43 @@
         var $this    = this,
             ulArray  = [],  //ul 陣列
             chkArray = [], //click li 陣列
+            temp = {},
             $chkLi_star,
             $chkLi_end,
             numStar,
-            numEnd;
+            numEnd,
+            post_data = '{post_data}'; /* 解析新增行程字串 */
+            data_str  = post_data.split("&");
+            data_len  = data_str.length;
+            repeat_cycle = '', /* 重複判斷 */
+            stop_time = '',   /* 重複結束時間 */
+            ov_s_time = '',
+            ov_e_time = '',
+            room_id = '';
+        var no_cont; // 是否跳著選
+
+        for (var i = 0; i < data_len; i++) {
+            schedule_data = data_str[i].split("=");
+
+            temp[schedule_data[0]] = schedule_data[1]
+        }
+
         /*---------------------------- 以下是點選效果判斷 ----------------------------*/
         this.liJug = function () {
-
             $('.fixed-bottom-right ul').on('click', 'li', function () {
                 var hasActive = $(this).hasClass('active'),              // 是否已點選
-                    CKtarget  = $(this).parents('ul').attr('data-name'), //抓取 ul class
-                    li_class  = $(this).attr('class'),                   //抓取 li class
+                    CKtarget  = $(this).parents('ul').attr('data-name'), // 抓取會議室 data-name
+                    li_class  = $(this).attr('class'),                   // 抓取 li class
                     $your_res = $(this).hasClass('your-reserved'),
                     $reserved = $(this).hasClass('reserved');
 
-                ulArray.push(CKtarget);                         // 將ul class 塞進陣列
-                var $last_len = String(ulArray.slice(-2, -1));  //抓取ulArray 的值，轉換成字串
-                chkArray.push(li_class);                        // 將li class 塞進陣列
+                ulArray.push(CKtarget);                     // 將ul class 塞進陣列
+                $last_len = String(ulArray.slice(-2, -1));  // 抓取ulArray 的值，轉換成字串
+                chkArray.push(li_class);                    // 將li class 塞進陣列
 
                 // 清除UL陣列第一筆
                 if (ulArray.length === 3) {
-                    ulArray.splice(0, 1)
+                    ulArray.splice(1, 1)
                 }
 
                 if ($your_res === true || $reserved === true || hasActive === true) {
@@ -500,25 +652,41 @@
                 if (chkArray.length === 2) {
                     $chkLi_star = String(chkArray[0]);
                     $chkLi_end  = String(chkArray[1]);
-                    numStar     = parseInt($chkLi_star);
-                    numEnd      = parseInt($chkLi_end);
+                    numSE()
 
                 } else if (chkArray.length === 3) {
                     $chkLi_star = String(chkArray[0]);
                     $chkLi_end  = String(chkArray[2]);
-                    numStar     = parseInt($chkLi_star);
-                    numEnd      = parseInt($chkLi_end);
+                    numSE()
 
                 } else if (chkArray.length > 3) {
                     $chkLi_star = String(chkArray[0]);
                     $chkLi_end  = String(chkArray.slice(-1));
+                    numSE()
+                }
+
+                function numSE(){
                     numStar     = parseInt($chkLi_star);
                     numEnd      = parseInt($chkLi_end);
                 }
 
+                function nochk(){
+                    $('.fixed-bottom-right [data-name="'+ $last_len +'"] li.active').each(function(){
+                        var _your_res = $(this).hasClass('your-reserved'),
+                            _reserved = $(this).hasClass('reserved');
+
+                        console.log('_your_res',_your_res,'_reserved',_reserved)
+
+                        if( _your_res == true || _reserved == true ){
+                            console.log('true')
+                            $(this).removeClass('active');
+                            return no_cont = true;
+                        }
+                    });
+                }
+
                 // 是否點選同一個UL
                 if ($last_len === CKtarget && chkArray.length !== 0) {
-
                     // 是否已被點選
                     if (hasActive === true) {
                         $(this).removeClass('active');
@@ -527,21 +695,18 @@
                     } else {
                         $(this).addClass('active');
                     }
-
                     // 由上往下點選
                     if (numStar < numEnd) {
                         $('[data-name="' + $last_len + '"]' + ' ' + '.' + $chkLi_star)
-                            .nextUntil('[data-name="' + $last_len + '"]' + ' ' + '.' + $chkLi_end)
-                            .addClass('active');
-                    // 由下往上點選
+                            .nextUntil('[data-name="' + $last_len + '"]' + ' ' + '.' + $chkLi_end).addClass('active');
+                        nochk();
+                        // 由下往上點選
                     } else {
                         $('[data-name="' + $last_len + '"]' + ' ' + '.' + $chkLi_star)
-                            .prevUntil('[data-name="' + $last_len + '"]' + ' ' + '.' + $chkLi_end)
-                            .addClass('active');
-                    } 
+                            .prevUntil('[data-name="' + $last_len + '"]' + ' ' + '.' + $chkLi_end).addClass('active');
+                        nochk();
+                    }
                 }
-
-                // 點選到其他UL內容時
                 if ($last_len !== CKtarget && chkArray.length !== 0) {
 
                     chkArray.length = 0;
@@ -558,15 +723,38 @@
 
         /*---------------------------- 以下是點選後取值 -----------------------------*/
         this.reservedFn = function () {
+            var str = new Date(),
+                y = str.getFullYear(),
+                m = str.getMonth()+1,
+                d = str.getDate(),
+                room_name = '';
+
+            /* 如果搜尋日期 是空的 就預設是今天 */
+//            if(date == '') {
+//                 date = y + '-' + number_time(m) + '-' +number_time(d);
+//            }
+
+            var chk_date = $('.this-month').text();
+                date = chk_date.substr(0, 4) + '-' + chk_date.substr(6, 2) + '-' + chk_date.substr(10, 2)
+
             $('.fixed-bottom-right ul li.active').each(function () {
-                var roomTime = $(this).attr('class'),
-                    rt_text  = roomTime.substr(0, 2);
-                roomName = $(this).parent('ul').attr('data-name');
+                  roomTime  = $(this).attr('class'); /* 取得選取 class 名稱 */
+                  rt_text   = roomTime.substr(0, 2); /* 取得 前2個字串 */
+                  room_id   = $(this).parent('ul').attr('data-id');
+                  room_name = $(this).parent('ul').attr('data-name');
+
                 //抓取當下所選擇的時間
                 ov_timeObj.push(rt_text);              //房間名稱
-                s_time = String(ov_timeObj[0]);        //開始時間 
+
+                s_time = String(ov_timeObj[0]);        //開始時間
                 e_time = String(ov_timeObj.slice(-1)); //結束時間
-                console.log(ov_timeObj)
+
+                e_time = parseInt(e_time) + 1;
+                ov_dayObj = $('.overview-today .this-month').text();
+                ov_s_time = date +' '+s_time + ":00"+ ":00"; /* 預約開始時間 */
+                ov_e_time = date +' '+e_time + ":00"+ ":00"; /* 預約結束時間 */
+                meeting = room_name + ov_roomObj;            /* 預約會議室 */
+                reservation_range = s_time + ":00"+ ":00" +'-'+ e_time + ":00"+ ":00"; /* 時間區間 */
 
             });
 
@@ -574,49 +762,135 @@
             $('.fixed-top-right ul li p:first-child').each(function () {
                 var r_p_text,
                     r_text = $(this).text();
-                if (r_text === roomName) {
-                    r_p_text = $(this).next().text();
+
+                if (r_text === room_name) {
+                    r_p_text   = $(this).next().text();
                     ov_roomObj = r_p_text;
                 }
             });
-            e_time       = parseInt(e_time) + 1;
-            ov_dayObj    = $('.overview-today .this-month').text();
-            ov_s_time    = ov_dayObj + s_time + ":00";
-            ov_e_time    = ov_dayObj + e_time + ":00";
-            ov_room_name = roomName + ov_roomObj;
-
-            console.log(ov_dayObj)
-            console.log('ov_s_time',ov_s_time)
-            console.log('ov_e_time',ov_e_time)
-            console.log(ov_room_name)
-
         }
         // 預約 & 取消按鈕
         this.ov_confirmBtn = function () {
+
             $('.overview-btn .confirm').on('click', function () {
-                $this.reservedFn();
-                // 判斷是否有點選重覆 hasChk_repeat
-                // 判斷是否重覆預約成功 repeat_status
-                if (hasChk_repeat === true && repeat_status === true) {    
-                    slideNav_bg.fadeIn();
-                    $('.repeat-confirm-window').removeClass('none');
-                    $this.repeat_win();
-                
-                } else if (hasChk_repeat === true && repeat_status === false) {
-                    slideNav_bg.fadeIn();
-                    $('.fail-confirm-window').removeClass('none');
-                    $this.fail_win();
-                
+                ov_timeObj.length = 0; /* 清空陣列 */
+
+                /* 判斷預約時間 是否正確 */
+                if( no_cont == true ){
+                    popup.alert('系統提示', '請選取正確的時段!');
+                    no_cont = false;
+                    return
                 }
-                hasData = true;
-                ov_timeObj.length = 0;
-                page = 'add'
-                $this.overview_locat(page);
+                /* end */
+
+                /* 判斷是新增 或是 修改 */
+                if(temp.type == 'edit_data') {
+                    $this.reservedFn();
+                    if(ov_timeObj.length === 0) {
+                        popup.confirm('系統提示', '您無更改預約時間!', function(){
+                            ov_timeObj.length = 0;
+                            page = 'add';
+                            $this.overview_locat(page);
+                        });
+                        return false;
+                    } else {
+                        content = '是否要更改預約時間  '+ meeting+ reservation_range;
+                    }
+
+                    popup.confirm('系統提示', content, function(){
+                        sendfun.post(burl + 'page_save/reservation/edit', {id_schedule:temp.id,id_reservation:temp.id_reservation,roomName:room_id,ov_s_time:ov_s_time,ov_e_time:ov_e_time}, {
+                            onSuccess: function(res){
+                                if(res.code == '100') {
+                                    var lid = res.lid;
+                                    /* 跳回新增行程 */
+                                    ov_timeObj.length = 0;
+                                    page = 'add';
+                                    $this.overview_locat(page, lid, meeting, date, reservation_range);
+
+                                    temp.start_day = new Date(ov_s_time).getTime();
+                                }
+                            },
+                            onFail: function(res){
+                                popup.alert(res.title, res.msg);
+                            }
+                        });
+                    });
+
+                    return false;
+
+                } else {
+                    $this.reservedFn();
+                    if(ov_timeObj.length === 0) {
+                        popup.alert('系統提示', '請選取預約時段');
+                        return false;
+                    }
+                }
+
+                /* 重複選項 重覆截止時間 */
+                if(temp.repeat_cycle && temp.stop_time) {
+                    repeat_cycle = temp.repeat_cycle;
+                    stop_time    = temp.stop_time;
+                }
+
+                /* 重覆新增 */
+                if(repeat_cycle !=0 && stop_time != '') {
+                    switch (repeat_cycle) {
+                        case 1:
+                            chk_repeat = 'everyday'; /* 每天 */
+                            break;
+                        case 2:
+                            chk_repeat = 'everyweek'; /* 每周 */
+                            break;
+                        case 3:
+                            chk_repeat = 'everymounth'; /* 每月 */
+                            break;
+                        case 4:
+                            chk_repeat = ''; /* 每年 */
+                            break;
+                    }
+
+                    /* 先確認 預約重複時間 決定顯示彈窗 */
+                    sendfun.post(burl + 'page_load/reservation/chk', {repeat_cycle:repeat_cycle,stop_time:stop_time,roomName:room_id,ov_s_time:ov_s_time,ov_e_time:ov_e_time}, {
+                        onSuccess: function(res){
+                            $('.slide-nav-bg').fadeIn();
+                            $('.fail-confirm-window').addClass('none');
+                            $('.repeat-confirm-window').removeClass('none');
+                            $this.repeat_win();
+                        },
+                        onFail: function(res){
+                            switch (res.code) {
+                                case 400:
+                                    $('.slide-nav-bg').fadeIn();
+                                    $('.repeat-confirm-window').addClass('none');
+                                    $('.fail-confirm-window').removeClass('none');
+                                    $this.fail_win(res.msg);
+                                    break;
+                            }
+                        }
+                    });
+                } else {
+                    /* 無重複新增 */
+                    sendfun.post(burl + 'page_save/reservation/add', {repeat_cycle:repeat_cycle,stop_time:stop_time,roomName:room_id,ov_s_time:ov_s_time,ov_e_time:ov_e_time}, {
+                        onSuccess: function(res){
+                            if(res.code == '100') {
+                                var lid = res.lid;
+                                /* 跳回新增行程 */
+                                ov_timeObj.length = 0;
+                                page = 'add';
+                                $this.overview_locat(page, lid, meeting, date, reservation_range);
+                            }
+                        },
+                        onFail: function(res){
+                            popup.alert(res.title, res.msg);
+                        }
+                    });
+                }
             });
 
+            /* 取消按鈕 */
             $('.overview-btn .cancel,.overview-back').on('click', function () {
                 ov_timeObj.length = 0;
-                page = 'add'
+                page = 'add';
                 $this.overview_locat(page);
             });
         }
@@ -639,7 +913,7 @@
         }
         /*--------------某時間已被他人預約----------------*/
         //.fail-time塞入 後端帶入的資料
-        this.fail_win = function () {
+        this.fail_win = function (msg) {
             var fa_win_text;
             if (chk_repeat === 'everyday') {
                 fa_win_text = '每天';
@@ -653,40 +927,113 @@
             var f1 = $('<p>').text('提醒您，'),
                 f2 = $('<p>').text('您的會議室時間將會「' + fa_win_text + '」預約'),
                 f3 = $('<p>').text('但由於以下時間已有人預約：'),
-                f4 = $('<p class="fail-time">').text(''),
+                f4 = $('<p class="fail-time">').text(msg),
                 f5 = $('<p>').text('除上述時間外，將為您「' + fa_win_text + '」預約'),
                 f6 = $('<p>').text('您是否仍要預約呢？');
-            $('.fail-confirm-window .title').append(p1, p2, p3, p4, p5, p6);
+            $('.fail-confirm-window .title').append(f1, f2, f3, f4, f5, f6);
         }
         /*--------------會議室預約彈窗內按鈕----------------*/
         this.re_cf_window = function () {
             var slideNav_bg = $('.slide-nav-bg');
             $('.repeat-confirm-window button').on('click', function () {
-                $(this).addClass('none');
+                //$this.reservedFn();
+                var attrClass = $(this).attr('class');
+                $('.repeat-confirm-window').addClass('none');
+                $('.repeat-confirm-window .title').text('');
                 slideNav_bg.fadeOut();
+
+                /* 點選確定 */
+                if(attrClass === 'confirm') {
+                    sendfun.post(burl + 'page_save/reservation/add', {repeat_cycle:repeat_cycle,stop_time:stop_time,roomName:room_id,ov_s_time:ov_s_time,ov_e_time:ov_e_time}, {
+                        onSuccess: function(res){
+                            if(res.code == '100') {
+                                var lid = res.lid;
+                                /* 跳回新增行程 */
+                                ov_timeObj.length = 0;
+                                page = 'add';
+                                $this.overview_locat(page, lid, meeting, date, reservation_range);
+                                slideNav_bg.fadeOut();
+                            }
+                        },
+                        onFail: function(res){
+                            popup.alert(res.title, res.msg);
+                        }
+                    });
+                }
+
+                /* 點擊取消 */
+                if(attrClass === 'cancel') {
+                    $('.fail-confirm-window').addClass('none');
+                    slideNav_bg.fadeOut();
+                }
             });
 
             $('.fail-confirm-window button').on('click', function () {
                 var attrClass = $(this).attr('class');
-                $(this).addClass('none');
-                slideNav_bg.fadeOut();
-                // 點選只預約一天
-                if (attrClass === 'oneday') { only1Day = true; }
+                //$('.fail-confirm-window').addClass('none');
+                //$('.fail-confirm-window .title').text('');
+                //slideNav_bg.fadeOut();
+
+                /* 點選確定 */
+                if(attrClass === 'confirm') {
+                    sendfun.post(burl + 'page_save/reservation/add', {repeat_cycle:repeat_cycle,stop_time:stop_time,roomName:room_id,ov_s_time:ov_s_time,ov_e_time:ov_e_time}, {
+                        onSuccess: function(res){
+                            if(res.code == '100') {
+                                var lid = res.lid;
+                                /* 跳回新增行程 */
+                                ov_timeObj.length = 0;
+                                page = 'add';
+                                $this.overview_locat(page, lid, meeting, date, reservation_range);
+                                slideNav_bg.fadeOut();
+                            }
+                        },
+                        onFail: function(res){
+                            popup.alert(res.title, res.msg);
+                        }
+                    });
+                }
+
+                /* 點擊取消 */
+                if(attrClass === 'cancel') {
+                    $('.fail-confirm-window').addClass('none');
+                    slideNav_bg.fadeOut();
+                }
+
+                /* 點選只預約一天 */
+                if (attrClass === 'oneday') {
+                    sendfun.post(burl + 'page_save/reservation/add', {repeat_cycle:'0',stop_time:stop_time,roomName:room_id,ov_s_time:ov_s_time,ov_e_time:ov_e_time}, {
+                        onSuccess: function(res){
+                            if(res.code == '100') {
+                                var lid = res.lid;
+                                /* 跳回新增行程 */
+                                ov_timeObj.length = 0;
+                                page = 'add';
+                                $this.overview_locat(page, lid, meeting, date, reservation_range);
+                                slideNav_bg.fadeOut();
+                            }
+                        },
+                        onFail: function(res){
+                            popup.alert(res.title, res.msg);
+                        }
+                    });
+                }
             });
         }
         // 跳頁
-        this.overview_locat = function(page){
-            console.log(page)
-            $.post(page + '.html', {}, function (pg) {
+        this.overview_locat = function(page, lid, meeting, date, reservation_range){
+            schedule_id = '';
+            if(temp.id) {schedule_id = temp.id}
+
+            $.post(burl + 'main/ToView/' +page, {data:post_data,lid:lid,meeting:meeting,date:date,reservation_range:reservation_range,type:temp.type,s_id:schedule_id,ov_s_time:ov_s_time,ov_e_time:ov_e_time}, function (pg) {
                 $('.page').html(pg);
                 $('footer,.calendar-box,.slideNav').hide();
             });
         }
         this.init = function () {
             $this.liJug();
-            $this.ov_confirmBtn();
+            $this.re_cf_window();
         }
-        $this.init();
+        $this.ov_confirmBtn();
     }
     var ov_liJug = new ovLijug();
 
@@ -713,7 +1060,7 @@
                 $liHeight       = $btm_rightLi.outerHeight(),
                 $btm_rightLen   = $btm_rightLi.length,
                 $wrapHeight     = $liHeight * $btm_rightLen;
-            //給予高度          
+            //給予高度
             $btm_rightWrap.css({ 'height': $wrapHeight });
             $btm_leftHeight.css({ 'height': $wrapHeight });
         }
@@ -726,7 +1073,12 @@
                 $this.btm_right();
             });
         }
-        $this.init();
+//        $this.init();
     }
     var ov_resize = new re_window_ov();
+
+    /* 不足未數  補0 */
+    function number_time(num){
+        num = (num<10) ? '0'+num:num;return num;
+    }
 </script>

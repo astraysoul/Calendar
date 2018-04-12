@@ -1,0 +1,573 @@
+<header class="meeting-con-header">
+    <!-- 上方選單 -->
+    <div class="top-menu clearfix">
+        <div class="meeting-con-back icon-arrow"></div>
+        <div class="meeting-con-title"></div>
+        <div class="meeting-con-chg">
+            <select name="act" id="pgcontent-select">
+                <option value="">請選擇</option>
+            </select>
+            <span class=" icon-point">
+        </div>
+    </div>
+    <!-- 閱讀人員 top -->
+    <div class="top-menu_read clearfix none">
+        <div class="read-con-back icon-arrow"></div>
+        <div class="read-con-title">閱讀人員</div>    
+    </div>
+</header>
+<!-- 閱讀人員頁面 -->
+<div class="read_page" style="display:none">
+</div>
+
+<div class="meeting-con-page">
+    <!-- 標題 -->
+    <div class="m-content-title"></div>      
+    <!-- 時間 -->
+    <div class="m-content-time">
+        <div class="star-end">
+            <ul>
+                <li class="star-box"></li>
+                <li>
+                    <span class="icon-goto"></span>
+                </li>
+                <li class="end-box"></li>
+            </ul>
+        </div>
+    </div>
+    <!-- 內容 -->
+    <div class="m-content-detail-wrap">
+        <div class="m-content-detail"></div>
+    </div>
+
+    <!-- 發佈相關資訊 -->
+    <div class="m-content-status"></div>
+</div>
+<div class="slide-nav-bg"></div>
+<!-- 確定刪除 彈跳視窗 -->
+<div class="delete-confirm-window none">
+    <div class="title">確定刪除此筆行程？</div>
+    <form action="">
+        <input type="checkbox" id="delete-data" name="push" class="" value="1">
+        <label for="delete-data"></label>
+        <span>發出刪除通知</span>
+    </form>
+    <div class="cfwindow-btn clearfix">
+        <button type="button" name="del_schedule" class="cancel">取消</button>
+        <button type="button" name="del_schedule" class="confirm">確定刪除</button>
+    </div>
+</div>
+<!-- 確定取消 彈跳視窗 -->
+<div class="cancel-confirm-window none">
+    <div class="title">確定取消此筆行程？</div>
+    <form action="">
+        <input type="checkbox" id="cancel-data" name="push" class="" value="1">
+        <label for="cancel-data"></label>
+        <span>發出取消通知</span>
+    </form>
+    <div class="cfwindow-btn clearfix">
+        <button type="button" name="cancel_schedule" class="cancel">不取消</button>
+        <button type="button" name="cancel_schedule" class="confirm">確定取消</button>
+    </div>
+</div>
+
+<!-- 已收藏 彈跳視窗 -->
+<div class="folder-confirm-window none">
+    <div class="title">已加入收藏紀錄</div>
+    <div class="cfwindow-btn clearfix">
+        <button type="button" name="collect" class="confirm">確定收藏</button>
+    </div>
+</div>
+
+<!-- 聊天室 -->
+<div class="icon-chatroom" data-id="chatroom" onclick=""></div> 
+
+<script>
+var id_schedule = '{id_schedule}';
+// 跳頁
+var pageChange_meeting_con = function () {
+    var fn = {
+        add_goPage: function (page,act,s_id) {            
+            $.post(burl + 'main/ToView/'+page+'/'+act, {s_id}, function (pg) {
+                switch(page){
+                    case 'calendar':
+                        pageHistory.push(page)
+                        $('footer,.calendar-box,.slideNav').show();
+                        $('.page').html(pg);
+                    break;
+                    case 'chatroom':
+                        pageHistory.push(page)
+                        $('footer,.calendar-box,.slideNav').hide();
+                        $('.page').html(pg);
+                    break;
+                    case 'add':
+                        pageHistory.push(page)
+                        $('footer,.calendar-box,.slideNav').hide();
+                        $('.page').html(pg);
+                    break;
+                    case 'folder':
+                        pageHistory.push(page);
+                        $('footer,.calendar-box,.slideNav').show();
+                        $('.page').html(pg);
+                        $('footer button').removeClass('active');
+                        $('.folderbtn').addClass('active');
+                    break;
+                    default:
+                        $('footer,.calendar-box,.slideNav').show();
+                        $('.page').html(pg);
+                }
+            });
+        },
+        init: function () {
+            var _this = this;
+            $('.meeting-con-back').on('click',function(){
+                // 抓取全域陣列最後一個
+                //pageHistory.pop();
+                var $back = pageHistory.slice(-1);
+
+                if($back == "folder"){
+                    page = 'folder';
+
+                }else if( $back == "infor" ){
+                    page = 'infor';
+
+                }else if($back == "search"){
+                    $('.search_bar').show();
+                    pageHistory.pop()
+                    page = String(pageHistory.slice(-1));
+                    // page = 'calendar';
+                }else{
+                    page = 'calendar';
+                }
+                _this.add_goPage(page,'','');
+            });
+            $('.icon-chatroom[data-id="chatroom"]').on('click',function(){
+                page = 'chatroom';
+                _this.add_goPage(page,'',id_schedule);
+            });
+        }
+    }
+    fn.init();
+    return fn;
+}
+var pg_chg_mc = new pageChange_meeting_con();
+
+// 日顯示 點選行程後
+var meetingRom_fn = function(){
+
+    var $this = this,
+        change_val,
+        slideNav_bg = $('.slide-nav-bg'),
+        fol_win     = $('.folder-confirm-window');
+        del_win     = $('.delete-confirm-window');
+        cancel_win  = $('.cancel-confirm-window');
+    var fn = {
+        id_schedule: '{id_schedule}',
+        sechList: '',
+        msg_status: '',
+        load_data:  function(){
+            sendfun.post(burl+"get_schedule/"+fn.id_schedule,'',{
+                onSuccess : function(res){
+                    fn.sechList = res.sechList;
+                    fn.msg_status = res.sechList.msg_status;
+                    fn.content_detail();
+                    fn.get_act(res.act_opt);
+                    fn.read_status(fn.sechList.id,fn.sechList.read_status); //更改閱讀狀態
+                    fn.hasMsg(fn.msg_status);
+                },
+                onFail: function(res){
+                    popup.alert("初始化行程類別失敗", res.msg || false, function(){
+                        window.location.reload();
+                    });
+                }
+            });   
+        },
+        // 判斷聊天室有無訊息
+        hasMsg: function(msg_status){
+            // 將ctMsg 一開始設false(沒聊天訊息)
+            // 若有聊天訊息 將ctMsg 設為 true
+            var ctMsg     = true,
+                $chatroom = $('.icon-chatroom[data-id="chatroom"]');
+            // 判斷 true or false 來增加class
+            // console.log('msg_status',msg_status);
+            if(msg_status === '0'){ 
+                $chatroom.addClass('active')    //未讀
+            }else{ 
+                $chatroom.removeClass('active') //已讀
+            }
+        },
+        // 會議內容
+        content_detail: function(){
+            var _this = this;
+                var sechList = fn.sechList;
+                    // hasRead將未讀改為已讀
+                    // sechList.hasRead = true;
+                
+                    /* 判斷行程 是否有會議室 */
+                    if(sechList.id_reservation != 0) {
+                        sechList_location = sechList.location;
+                        meeting_res = sechList.reservation_start_day +'~'+ sechList.reservation_end_day.substr(10);
+                    } else {
+                        sechList_location = sechList.location;
+                        meeting_res = '';
+                    }
+
+                    $('.meeting-con-title').text(sechList.typeName);
+                    $('.m-content-title').text(sechList.title);
+
+                    // 開始時間
+                    var starDay = $('<p class="star-day">').text(sechList.s_day),
+                        starWeek = $('<p class="star-week">').text(sechList.s_week);
+                    var star_Top = $('<div class="star-top">').append(starDay,starWeek),
+                        star_Time = $('<div class="star-time">').text(sechList.s_time);
+                    $('.star-box').append(star_Top,star_Time);
+                    
+                    // 結束時間
+                    var endDay = $('<p class="end-day">').text(sechList.e_day),
+                        endWeek = $('<p class="end-week">').text(sechList.e_week);
+                    var end_Top = $('<div class="end-top">').append(endDay,endWeek),
+                        end_Time = $('<div class="end-time">').text(sechList.e_time);
+                    $('.end-box').append(end_Top,end_Time);
+
+                    //m-content-detail-wrap 中間區塊
+                    var p_icon_location = $('<p class="icon-loction">'),
+                        p_location = $('<p>').text(sechList_location), /* 地點 */
+                        p_meeting_time = $('<p>').text(meeting_res),
+
+                        p_icon_people = $('<p class="icon-people">');
+                        p_people = $('<a href="javascript:void(0)" class="read_list_page"><p>'+ sechList.people +'位閱讀人員</p></a>');
+
+                        p_icon_data = $('<p class="icon-data">');
+                        p_data = $('<p>').text(sechList.memo)
+
+
+                        if(sechList.id_reservation != 0) {
+                            div_time_name = $('<div class="detail-location-right">').append( p_location,p_meeting_time)
+                        } else {
+                            div_time_name = $('<div class="detail-location-right two_line_txt">').append( p_location)
+                        }
+
+                        //div_time_name = $('<div class="detail-location-right">').append( p_location,p_meeting_time),
+                        div_location = $('<div class="detail-location clearfix">').append(p_icon_location,div_time_name);
+                        div_people = $('<div class="detail-people">')
+                                            .append(p_icon_people, p_people);
+                        div_detail = $('<div class="detail-subtitle">')
+                                            .append(p_icon_data, p_data);
+                    $('.m-content-detail').append(div_location, div_people,div_detail);
+
+                    if(sechList.remind === '無提醒'){
+                            sechList.remind = '無';
+                    }
+                    if(sechList.repeat === '無重複'){
+                            sechList.repeat = '無';
+                    }
+
+                    //m-content-status 發佈相關資訊
+                    var p_s_people = $('<p class="status-people">').text(sechList.uacc + '發佈，'+''),
+                        p_s_remind = $('<p class="status-remind">').text(sechList.remind+'提醒，'+''),
+                        p_s_repeat = $('<p class="status-repeat">').text(sechList.repeat + '重複');
+
+                    $('.m-content-status').append(p_s_people,p_s_remind,p_s_repeat); 
+
+                    // 開啟該則閱讀人員 詳細資料
+                    $('a.read_list_page').on('click',function(){
+                        $('.top-menu').hide();
+                        $('.read_page').fadeIn();
+                        $('.top-menu_read').fadeIn();
+                        
+                        fn.get_read_list();
+                    });
+                    // 關閉該則閱讀人員詳細資料
+                    $('.read-con-back').on('click',function(){
+                        $('.read_page').hide();
+                        $('.top-menu_read').hide();
+                        $('.top-menu').fadeIn();
+                    })    
+        },
+        // 閱讀人員 渲染資料
+        get_read_list : function(){
+            sendfun.post(burl+"get_read_person/" + fn.id_schedule,'',{
+                onSuccess:function(res){
+                    if(res.code == 100){
+                        random(res.dep);
+                    }
+                },
+                onFail:function(res){
+                    popup:alert('沒有連結到伺服器',res.msg || false,function(){
+                        window.location.reload();
+                    });
+                }
+            });
+            // 產出 行程閱讀人員
+            function random(data){
+                var getData = data;
+                $('.read_page').html('');
+
+                for(var i in getData){
+                    var _dep = getData[i];
+                    var depName = _dep.depname; // 部門名稱
+                    
+                    var _wrap = $('<div/>').addClass('dep_wrap'),
+                        _dep_data = $('<div/>').addClass('dep_data'),
+                        _dep_person = $('<div/>').addClass('dep_person');
+
+                    var num = 0,
+                        readArr = [],
+                        result;
+                    //產人員
+                    for(var k in _dep.staff){
+                        var person = _dep.staff[k];
+                        num += 1;
+
+                        readArr.push(person.name);
+                        var readArr2 = readArr.join('、');
+                    }
+                    //過濾掉 陣列內重複的值
+                    result = readArr.filter(function(elm,index,arr){
+                            return arr.indexOf(elm) == index;
+                    });
+                    _dep_person.append(readArr2); //塞入人員數量
+
+                    var _span = $('<span/>').append(num),
+                        _p_span = $('<span/>').append(depName),
+                        _dep_name = $('<div/>').addClass('dep_name').append(_p_span,_span);
+                        _dep_data.append(_dep_name,_dep_person);
+                        _wrap.append(_dep_data);
+                    $('.read_page').append(_wrap);
+
+                }   
+            }
+            random();
+        },
+        //行程的修改按鈕
+        get_act: function(act){
+
+            $.each(act,function(key,val){
+                 $('#pgcontent-select').append($('<option>', { 
+                        value: val.val,
+                        text : val.name 
+                    }));
+            });
+        },
+        // 彈窗消失
+        cf_chk_del: function(){
+            slideNav_bg.fadeOut();
+            del_win.addClass('none');
+            window.location = burl+'initset'; //回到首頁
+        },
+        cf_chk_cancel: function(){
+            slideNav_bg.fadeOut();
+            $('.cancel-confirm-window').addClass('none');
+            window.location = burl+'initset'; //回到首頁
+        },
+        cf_chk_f: function(){
+            slideNav_bg.fadeOut();
+            fol_win.addClass('none');
+        },
+        // 點選彈窗BTN 判斷
+        cfClose: function(){
+            var _this = this;
+            $('.cfwindow-btn').on('click','button',function(){
+                var attrClass = $(this).attr('class');
+                var btnName = $(this).attr('name');
+
+                if( attrClass === 'confirm'){
+                    //確認按鈕
+                    switch(btnName){
+                        case 'cancel_schedule':
+                            //是否通知
+                            var push = $('.cancel-confirm-window input[type="checkbox"]').val();
+                            sendfun.post(burl+'modi_schedule/cancel',{'id':fn.id_schedule,'push':push},{
+                            onSuccess : function(res){
+                                if(res.code ==='100'){
+                                    _this.cf_chk_cancel();   // 取消行程
+                                }else{
+                                    popup.alert("取消失敗", res.msg || false, function(){
+                                        slideNav_bg.fadeOut();
+                                        fol_win.addClass('none');
+                                    });
+                                }
+                            },
+                            onFail: function(res){
+                                popup.alert("取消失敗", res.msg || false, function(){
+                                    slideNav_bg.fadeOut();
+                                    fol_win.addClass('none');
+                                });
+                            }
+                         });    
+                        break;
+                        case 'del_schedule':
+                            //是否通知
+                            var push = $('.delete-confirm-window input[type="checkbox"]').val();
+
+                                sendfun.post(burl+'modi_schedule/del',{'id':fn.id_schedule,'push':push},{
+                                    onSuccess : function(res){
+                                        if(res.code ==='100'){
+                                            _this.cf_chk_del();   // 刪除行程
+                                        }else{
+                                            popup.alert("刪除失敗", res.msg || false, function(){
+                                                slideNav_bg.fadeOut();
+                                                fol_win.addClass('none');
+                                            });
+                                        }
+                                        
+                                    },
+                                    onFail: function(res){
+                                        popup.alert("刪除失敗", res.msg || false, function(){
+                                            // window.location.reload();
+                                        });
+                                    }
+                                 });
+                            break;
+                        case 'collect':
+                            sendfun.post(burl+'modi_schedule/collect',{'id':fn.id_schedule},{
+                            onSuccess : function(res){
+                                if(res.code ==='100'){
+                                    _this.cf_chk_f();   // 收藏
+                                }else{
+                                    popup.alert("收藏失敗", res.msg || false, function(){
+                                        slideNav_bg.fadeOut();
+                                        fol_win.addClass('none');
+                                    });
+                                }
+                            },
+                            onFail: function(res){
+                                popup.alert("收藏失敗", res.msg || false, function(){
+                                    // window.location.reload();
+                                });
+                            }
+                         });     
+                        break;
+                    }
+                }else{
+                    //取消按鈕
+                    switch(btnName){
+                        case 'del_schedule':
+                            slideNav_bg.fadeOut();
+                            del_win.addClass('none');
+                            break;
+                        case 'cancel_schedule':
+                            slideNav_bg.fadeOut();
+                            $('.cancel-confirm-window').addClass('none');
+                            break;
+                        case 'collect':
+                            slideNav_bg.fadeOut();
+                            fol_win.addClass('none');
+                            break;
+                    }
+
+                }
+            });
+        },
+        // 判斷右上 選擇
+        chang_value: function(){
+            var _this = this;
+            $('#pgcontent-select').change(function(){
+                var select_val = $(this).val();
+                //console.log(select_val);
+                switch(select_val){
+                    case 'edit':
+                        // 將資料帶入新增行程頁面
+                        //console.log('edit');
+                        page = "add";
+
+                        pg_chg_mc.add_goPage(page,'edit',fn.id_schedule);
+                    break;
+                    case 'copy':
+                        // 將資料帶入新增行程頁面
+                        page = "add";
+                        pg_chg_mc.add_goPage(page,'copy',fn.id_schedule);
+                    break;
+                    case 'del':
+                        $('.delete-confirm-window').removeClass('none');
+                        $('.slide-nav-bg').fadeIn();
+                    break;
+                    case 'cancel':
+                        $('.cancel-confirm-window').removeClass('none');
+                        $('.slide-nav-bg').fadeIn();
+                    break;    
+                    case 'collect':
+                        $('.folder-confirm-window').removeClass('none');
+                        $('.slide-nav-bg').fadeIn();
+                    break;
+                }
+            });
+        },
+        //彈窗input勾選效果
+        inupt_chk: function(){
+            //刪除行程
+            var confirmInput_delet = $('.delete-confirm-window input[type="checkbox"]');
+            confirmInput_delet.prop('checked',true).next('label').addClass('icon-tick');
+            confirmInput_delet.on('click',function(){
+                var chkType  = $(this).prop('checked');
+                if( chkType == true ){
+                    $(this).val(1);
+                }else{
+                    $(this).val(0)
+                }
+                $(this).next().toggleClass('icon-tick')
+            });
+            //取消行程 (待修)
+            var confirmInput_cancel = $('.cancel-confirm-window input[type="checkbox"]');
+            confirmInput_cancel.prop('checked',true).next('label').addClass('icon-tick');
+            confirmInput_cancel.on('click',function(){
+                var chkType  = $(this).prop('checked');
+                if( chkType == true ){
+                    $(this).val(1);
+                }else{
+                    $(this).val(0)
+                }
+                $(this).next().toggleClass('icon-tick')
+            });
+        },
+        //resize
+        re_window_mContent: function(){
+            var $m_conPage = $('.meeting-con-page'),
+                $re_height = $(window).height(),
+                $re_header = Math.ceil($('.top-menu').outerHeight()),
+                re_pageHeight = Math.ceil( $re_height - $re_header + 7);
+            
+            $m_conPage.css({'height': re_pageHeight}) 
+        },
+        read_status: function (id_schedule,read_status) {
+            //已讀未讀    
+                 if(read_status === "0"){
+                     //未讀 ->已讀
+                     sendfun.post(burl+"has_read/"+id_schedule,'',{
+                         onSuccess : function(res){
+                             //console.log(res);
+                             if(res.code === '100'){
+                                //console.log(' read_status ok');
+                             }else{
+                                 console.log('err');
+                             }                    
+                         },
+                         onFail: function(res){
+                             popup.alert("讀取行程失敗,請重試", res.msg || false, function(){
+                                 window.location.reload();
+                             });
+                         }
+                     });
+                    
+                 }                 
+        },
+        init: function(){
+            var _this = this;
+            _this.load_data(); //載入資料
+            _this.inupt_chk();
+            _this.cfClose();
+            
+            
+            _this.re_window_mContent();
+            
+            _this.chang_value();
+            $(window).resize(function(){
+                _this.re_window_mContent();
+            });
+        }
+    }
+    fn.init();
+    return fn;
+}
+var mr_fn = new meetingRom_fn();
+</script>

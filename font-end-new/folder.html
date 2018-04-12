@@ -1,0 +1,277 @@
+<header class="folder-header">
+    <!-- 上方選單 -->
+
+    <div class="top-menu clearfix">
+        <div class="filter-box">
+            <div class="icon-filter-2" style="display: none;"></div>
+            <div class="icon-filter-1" style="display: none;"></div>
+        </div>
+        <!-- 標題 -->
+        <div class="folder-title">收藏與記錄</div>
+
+        <div class="search icon-search"></div>
+    </div>
+    <!-- 篩選區塊 -->
+</header>
+
+<div class="folder-page">
+
+    <!-- 上方區塊 -->
+    <div class="topBtn">
+        <button type="button" id="myfolder" class="btnstyle active">
+            <span class="icon-love"></span>
+            我的收藏紀錄
+        </button>
+        <button type="button" id="myrecord" class="btnstyle">
+            <span class="icon-clock"></span>
+            我的預訂記錄
+        </button>
+    </div>
+
+    <!-- 內容區塊 -->
+    <div class="folder-content">
+        <ul></ul>  
+    </div>
+</div>
+
+<script>
+var folderPage_fn = function(){
+    //內容
+    var fn = {
+        sechList: '',
+        search_btn: function(){
+            //搜尋功能
+            $('header .search').on('click', function () {  
+                //當前的搜尋頁面   
+                var top = $('.topBtn .active').attr('id');
+                searchFn(top);
+            });
+            //關閉搜尋page
+            $('a.cancel_btn').on('click', function () {
+                $('section.search_bar').fadeOut();
+                $('.result_tab,.record_tab ul').html(''); //關閉後 清空所有資料
+            });
+        },
+        folder_con: function(data,type){
+            var _id,
+                txt;
+            $('.folder-content ul').html('');    
+            
+            if( data && data !== "null" && data !== "undefined" ){
+
+                if(type === 'collect'){
+                    txt = '收藏';
+                    txtmsg = '收藏紀錄';
+                }else{
+                    txt = '新增';
+                    txtmsg = '預定紀錄';
+                }
+
+                if(data.length > 0){
+                    
+                    for(var k in data){
+                        f_data = data[k];
+                        var f_p01 = $('<p>').text(f_data.typeName),
+                        f_icon = $('<div class="icon-type">').addClass(f_data.classType).append(f_p01),
+                    // folder-recod-list 子層框架
+                        f_spanDay       = $('<span>').text(f_data.s_date),
+                        f_spanWeek      = $('<span>').text(' '+ f_data.s_week),
+                        folder_day      = $('<p class="folder-day">').append(f_spanDay, f_spanWeek),  
+                        folder_theme    = $('<p class="folder-theme">').text(f_data.title),
+                        f_spanIcon      = $('<span class="icon-loction">'),
+                        f_span01        = $('<span>').text(f_data.location),
+                        f_span02        = $('<span>').text('於' + f_data.itime + txt),
+                        folder_loaction = $('<p class="folder-loaction clearfix">').append(f_spanIcon, f_span01, f_span02),
+                    // div外框架
+                        f_recodeList    = $('<div class="folder-recod-list">').append(folder_day,folder_theme,folder_loaction),
+                        f_recodeLeft    = $('<div class="folder-recod-left">').append(f_icon, f_recodeList);
+
+                        
+                        var f_recod         = $('<div class="folder-recod clearfix">').append(f_recodeLeft,'<button type="button" class="btn-delete">刪除</button>');
+
+                        var folderWrap      = $('<li>').append(f_recod).attr('id-schedule',f_data.id).attr('id-collect',f_data.id_collect).attr('status',f_data.status);    
+                        $('.folder-content ul').append(folderWrap);
+                    }
+
+                }else{
+                    $('.folder-content ul').append('<li class="nolist"><p class="title">目前無'+txtmsg+'</p></li>');
+                }
+                    
+            }
+            getData = false;
+
+            /*-- 滑動效果 --*/
+            $('.folder-recod').on("touchstart", function(e) {
+                startX = e.originalEvent.changedTouches[0].pageX;
+                startY = e.originalEvent.changedTouches[0].pageY;
+            });
+            $('.folder-recod').on("touchend", function(e) {         
+                moveEndX = e.originalEvent.changedTouches[0].pageX;
+                moveEndY = e.originalEvent.changedTouches[0].pageY;
+                X = moveEndX - startX;
+                Y = moveEndY - startY;            
+               
+                if ( Math.abs(X) > Math.abs(Y) && X > 0) {
+                    $(this).stop().animate({ 'left': 0 },300);
+               
+                }else if ( Math.abs(X) > Math.abs(Y) && X < 0 ) {
+                    $(this).stop().animate({ 'left': '-22vw' },300);   
+                }
+            });
+
+            /*-- 左滑刪除按鈕 --*/
+            $('.btn-delete').on('click',function(){
+                var _target = $(this).parent().parent(),
+                    _id = _target.attr('id-schedule'),   //被刪除行程的ID
+                    _id_collect = _target.attr('id-collect');   //被刪除行程的收藏ID
+                if(type === 'collect'){
+                    sendfun.post(burl+"del_collect/"+_id_collect,'',{
+                        onSuccess : function(res){
+                            if(res.code == '100'){
+                                    _target.fadeOut(500);
+                                    setTimeout(function(){ _target.remove(); }, 500);
+                            }
+                        },
+                        onFail: function(res){
+                            popup.alert("刪除行程收藏失敗", res.msg || false, function(){
+                                window.location.reload();
+                            });
+                        }
+                    }); 
+                }else{
+                    //刪除行程
+                    sendfun.post(burl+"modi_schedule/del",{'id':_id,'push':'1'},{
+                        onSuccess : function(res){
+                            if(res.code == '100'){
+                                    _target.fadeOut(500);
+                                    setTimeout(function(){ _target.remove(); }, 500);
+                            }
+                        },
+                        onFail: function(res){
+                            popup.alert("刪除行程失敗", res.msg || false, function(){
+                                window.location.reload();
+                            });
+                        }
+                    }); 
+                }
+                
+            });
+            fn.chkLi();
+        },
+        /*-- 我的收藏紀錄與預訂記錄按鈕 --*/
+        folderBtn: function(){
+            $('.topBtn button').on('click',function(){
+                var chk_class = $(this).attr('class');
+                var typeName = $(this).attr('id');
+                $('.topBtn button').removeClass('active');
+                $(this).addClass('active');
+                switch(typeName){
+                    case 'myfolder':
+                        fn.load_folder();
+                    break;
+                    case 'myrecord':
+                        fn.load_history();
+                    break;
+                }
+            });            
+        },
+        chkLi: function(){
+            $('.folder-recod-left').on('click',function(){
+                var getId = $(this).parents('li').attr('id-schedule'),
+                    getStatus = $(this).parents('li').attr('status'),
+                    page = 'page';
+                if(getId === undefined ||  getId === '0' ){
+                    popup.alert('查無此行程編號!');
+                    return false;
+                }    
+                //狀態不為取消才可觀看行程內容    
+                if(getStatus === '0'){
+                    fn.add_goPage(page,getId);
+                }else if(getStatus === '1'){
+                    popup.alert('此行程已取消!');
+                }else if(getStatus === '2'){
+                    popup.alert('此行程已刪除!');
+                }    
+            });
+        },
+        add_goPage: function (page,id_schedule) {
+            if(id_schedule === undefined || id_schedule === 0 || id_schedule === ''){
+                popup.alert('查無此行程編號!');
+                return false;
+            }
+            $.post(burl + 'main/ToView/' +page, {id_schedule}, function (pg) {
+                $('.page').html(pg);
+                $('footer,.calendar-box,.slideNav').hide();
+            });
+        },
+        scrollChk: function () {
+            var _this = this;
+            $('.folder-content').scroll(function () {
+                var scrollTop    = $(this).scrollTop(),
+                    divH         = $(this).height(),
+                    nScrollHight = $(this)[0].scrollHeight, //滾動軸高度
+                    nScrollTop   = $(this)[0].scrollTop; //滾動軸到div頂部高度
+                nScrollHight -= 80;
+                //捲動到底部時
+                if (nScrollTop + divH >= nScrollHight) {
+                    //load第一次資料後 把getData 改true
+                    if (getData) { return }
+                    getData = true;
+                    $('#next').fadeOut().fadeIn(); //loading...
+                    //_this.ajax_fn(); //再送ajax糗資料
+                }
+            });
+        },
+        load_folder: function () { //收藏
+            sendfun.post(burl+"get_schedule_collect",'',{
+                onSuccess : function(res){
+                    fn.sechList = res.sechList;
+                    fn.folder_con(fn.sechList,'collect');
+                    $('.folder-content').scrollTop(0);
+                },
+                onFail: function(res){
+                    popup.alert("初始化收藏紀錄失敗", res.msg || false, function(){
+                        window.location.reload();
+                    });
+                }
+            });   
+        },
+        load_history: function () { //個人紀錄
+            sendfun.post(burl+"get_schedule_history",'',{
+                onSuccess : function(res){
+                    fn.sechList = res.sechList;
+                    fn.folder_con(fn.sechList,'history');
+                    $('.folder-content').scrollTop(0)
+                },
+                onFail: function(res){
+                    popup.alert("初始化預訂記錄失敗", res.msg || false, function(){
+                        window.location.reload();
+                    });
+                }
+            });   
+        },
+        re_window: function(){
+            var pgTarget = $('.folder-content');
+            var $height = $(window).height();
+            var $header = Math.ceil($('.top-menu').outerHeight());
+            var $topbar = Math.ceil($('.topBtn').outerHeight());
+            var $footer = Math.ceil($('footer').outerHeight());
+            var pageHeight = Math.ceil( $height - $header - $topbar);
+            pgTarget.css({'height': pageHeight,'padding-bottom': $footer,});
+        },
+        init: function(){
+            var _this = this;
+            
+            _this.folderBtn();
+            _this.scrollChk(); 
+            _this.search_btn();
+            _this.load_folder(); //預設顯示收藏紀錄
+            _this.re_window();
+        }
+    }
+    fn.init();
+    return fn;
+}
+var folderFn = new folderPage_fn();
+
+</script>

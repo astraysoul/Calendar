@@ -1,0 +1,58 @@
+<header class="info-header">
+    <div class="top-menu">
+        <div class="info-title">動態消息</div>
+    </div>
+</header>
+<div class="info-page">
+    <div class="infor-content">
+        <ul> </ul>
+    </div>
+</div>
+
+<script>
+$(function(){
+    pgTarget = $('.infor-content');
+    var re_size_infor = new re_window_other(pgTarget);
+});
+
+var folder_fun = function(){
+    var fn ={
+        //動態消息已讀
+        push_read: function (id_schedule,id_push,type){
+            sendfun.post(burl + "read_push/" + id_push,'',{
+                onSuccess : function(res){
+                    if(res.code === '100'){
+                    setMsg.load_data(); // 點下已讀就在載一次資料
+
+                    if(type !== '2' && type !== '3'){
+                        fn.add_goPage('page',id_schedule);
+                    }
+                    }else{
+                        console.log('err');
+                    }                    
+                },
+                onFail: function(res){
+                    popup.alert("更改通知閱讀狀態,請重試", res.msg || false, function(){
+                        window.location.reload();
+                    });
+                }
+            });
+        },
+        add_goPage: function (page,id_schedule) {
+            //更改通知閱讀狀態
+            $.post(burl + 'main/ToView/' + page, {id_schedule}, function (pg) {
+                $('.page').html(pg);
+                $('footer,.calendar-box,.slideNav').hide();
+            });
+        },
+        init: function(){
+            // this.load_data();
+            // 一進info頁面就先載一次資料
+            setMsg.load_data(); 
+        }
+    }
+    fn.init();
+    return fn;
+}
+var f_n = new folder_fun();
+</script>

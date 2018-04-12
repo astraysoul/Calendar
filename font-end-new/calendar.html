@@ -1,0 +1,1108 @@
+<header>
+    <!-- 上方選單 -->
+    <div class="top-menu clearfix">
+        <div class="menu icon-nav"></div>
+        <div class="dayNow">
+            <label for="month" class="this-month"></label>
+            <input type="checkbox" id="month" name="" class="mouth-switch">
+            <label for="month" class="icon-arrow"></label>
+
+        </div>
+        <div class="search icon-search"></div> 
+    </div>
+    <!-- 月曆區塊 -->
+    <div class="top-monthBox">
+        <div class="dateWrap">
+            <div class="week-list">
+                <ul class="clearfix">
+                    <li>SUN</li>
+                    <li>MON</li>
+                    <li>TUE</li>
+                    <li>WED</li>
+                    <li>THU</li>
+                    <li>FRI</li>
+                    <li>SAT</li>
+                </ul>
+            </div>
+            <div class="data-list clearfix">
+
+            </div>
+        </div>
+    </div>
+    </div>
+    <!-- 上方週顯示 -->
+    <div class="slideweek clearfix">
+        <div class="slidewrap">
+            <div class="slidebox"></div>
+        </div>
+    </div>
+</header>
+<div class="calendar-page">
+    <div class="cal-block">
+        <!-- 便利貼式 sticky -->
+        <!-- 條列式 Article-type -->
+    </div>
+</div>
+<!-- 半透黑背景 -->
+<div class="slide-nav-bg"></div>
+<!-- 側邊選單 -->
+<div class="slide-nav">
+    <div class="container">
+        
+        <div class="slideNav-top">
+            <div class="change-mode">
+                <button type="button" class="calendar-mode active">行事曆</button>
+                <button type="button" class="project-mode">專案管理</button>
+            </div>
+            <p>行事曆顯示分類篩選</p>
+            <div class="slideNav-top-btn">
+                <button type="button" name="" class="select-all">全選</button>
+                <button type="button" name="" class="unselect-all">全不選</button>
+            </div>
+        </div>
+        <div class="slideNav-content">
+            <form id="s_type" action=""></form>
+        </div>
+    </div>
+    <div class="slide-nav-btn clearfix">
+        <button type="button" name="" class="cancel">取消</button>
+        <button type="button" name="" class="confirm">確定</button>
+    </div>  
+</div>
+<script>
+var typeList = json_decode('{slideContent}'),
+    cusObj = json_decode('{personalize}');
+var month_block = function () {
+    var scr;
+    var Month_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+    var catch_data_day;
+    var dayObj = json_decode('{day_of_year}');
+    var yearDay = '{yearDay}';
+    var slideBox,
+        selfLi,
+        liWidth,
+        leftNum; // 7個li的加總寬度
+    var cur_next,
+        t_dateNum;
+    var current,
+        calendarLi = $('.calendar-box ul li'),
+        topweekLi  = $('.slideweek li'),
+        slideNav   = $('.slide-nav'),
+        slideBg    = $('.slide-nav-bg'),
+        times;
+    
+    // 判斷有無動態消息，如果有，給予true
+    var hasInfor = false;
+    // 動態消息則數
+    var inforNum;
+    var slideNav_box = $('.slide-nav'),
+        slideBg  = $('.slide-nav-bg'),
+        s_item = [],
+        send = {};
+    var fn = {
+        sch_Date: '',
+        ymd: '',
+        init : function () {
+            var _this = this;
+            _this.created_month();
+            _this.touch_move();
+            _this.chk_Day();
+            _this.CalendFn();
+            _this.sb_content();
+            _this.count_fn();
+            /*-----  stickyFn   -----*/
+            // 日顯示轉換判斷
+            if( chgType == 0 ){
+                noteType = true;
+            }else if( chgType == 1 ){
+                noteType = false;
+            }    
+
+            //便利貼 ↓  ymd(全域變數) = 一開始帶入當天日期
+            if( chkDate !== '' ){
+                ymd = chkDate;
+            }else{
+                ymd = String($year + $month + $day);
+            }
+            //_this.load_data(ymd);
+            _this.load_data_type(ymd,s_type); //篩選行程類別
+
+            /*----- cal_block_fn  -----*/
+            _this.cal_content();
+
+            //calendar-page高度
+            _this.ca_pageTop();
+            _this.dataList_Ul();
+
+            //底部按鈕
+            $(window).on('load',function(){
+                btn_name = "note-show";
+                $('.note-show').addClass('active')
+            });
+            _this.btnCalender(); 
+            _this.inforIcon();
+
+            //搜尋功能
+            _this.search_btn();
+            _this.classify_height();
+            _this.classify_List();
+            _this.chkBtn();   
+            _this.topBtn();
+            _this.sliderBtn();   
+
+            $('.slide-nav-bg').on('click',function(){
+                _this.menu_in();
+                _this.calendar_box_hide();
+            });
+
+            $(window).resize(function(){
+                _this.classify_height();
+                // _this.calendar_page_h();
+            });   
+        },
+        //搜尋功能 
+        search_btn: function(){
+            $('header .search').on('click', function () {        
+                searchFn('index');
+            });
+            //關閉搜尋page
+            $('.cancel_btn').on('click', function () {
+                $('section.search_bar').fadeOut();
+                $('.result_tab,.record_tab ul').html(''); //關閉後 清空所有資料
+            });
+        },
+        // 月曆
+        //上方點選下拉區塊(一個月)
+        created_month : function () {
+            var moveNum;
+            var f_week;
+            //遍歷該年的月份
+            for (var i in dayObj) {
+                for( var g in dayObj[i] ){
+                    f_week = dayObj[i][g].week
+                    break;
+                }
+                var monthNum = $('<ul class="clearfix">').attr('data-day', i), // 獲取該月第一天的星期 
+                    space    = Month_EN.indexOf(f_week);  // 再對照英文日期  
+                
+                // 填充前面格數
+                for (var j = 0; j < space; j++) {
+                    monthNum.append('<li></li>');
+                }
+                //遍歷該月份的日期
+                for (var k in dayObj[i]) {
+                    var dayNum = $('<li>').attr('class', dayObj[i][k].date + '-d').text(dayObj[i][k].date);
+                    monthNum.append(dayNum);
+                }
+                // 產外層UL月份    
+                $('.data-list').append(monthNum)
+                // return false; // 指產一個月
+            }
+            //上方年份與月份    
+            $('.dayNow .this-month').text($year + '年' + ' ' + $month + '月');
+            // 顯示當月
+            $('.data-list ul').hide().removeClass('active');
+            $('.data-list ul').eq(parseInt($month)-1).show().addClass('active');
+            
+            // 找尋月份&當日
+            var str      = parseInt($month) - 1; 
+            var li_each  = $('.data-list ul').eq(str);
+            var data_day = li_each.attr('data-day');
+            // 月曆點選效果
+            $('ul[data-day="'+ data_day +'"] li').each(function(){
+                var getClass = $(this).attr('class');
+                if( getClass !== undefined ){     
+                    var getday = getClass.substr(0,2);                    
+                    if( getday === String($day) ){ 
+                        $(this).addClass('today')
+                    }
+                }
+            });
+        },
+        // 上方點選下拉區塊-月曆滑動效果
+        touch_move : function () {
+            var dataLi_ul = $('.data-list ul');
+            var _this = this;
+            // 抓取當月，並為下方滑動基準值
+            moveNum = parseInt($month)-1;
+            dataLi_ul.touchwipe({
+                //wipeLeft 向左滑動
+                wipeLeft: function () {
+                    
+                    if (moveNum < 11) {
+                        moveNum += 1;
+                        dataLi_ul.hide().removeClass('active');
+                        dataLi_ul.eq(moveNum).show().addClass('active');
+                        fn.dataList_Ul();
+                    } else if (moveNum === 11) {
+                        moveNum = 11;
+                        fn.dataList_Ul();
+                        return;
+                    }
+                    _this.chgDay();
+                },
+                //wipeRight 向右滑動
+                wipeRight: function () {
+                    
+                    if (moveNum > 0) {
+                        moveNum -= 1;
+                        $('.data-list ul').hide().removeClass('active');
+                        $('.data-list ul').eq(moveNum).show().addClass('active');
+                        fn.dataList_Ul();
+                    } else if (moveNum === 0) {
+                        moveNum = 0;
+                        fn.dataList_Ul();
+                        return;
+                    }
+                    _this.chgDay();
+                },
+                //min_move_x 水平移動最小像
+                min_move_x: 20,
+                //min_move_y 垂直移動最小像素
+                min_move_y: 20,
+                preventDefaultEvents: true
+            });
+        },
+        // 上方點選下拉區塊-月曆高度
+        dataList_Ul : function () {
+            var dataWrap_h = $('.dateWrap').height(),
+                dataList_h = $('.data-list ul.active').height(),
+                total_h    = dataWrap_h + dataList_h + 20;
+            $('.top-monthBox').height(total_h);
+        },
+        // 上方點選下拉區塊-月曆上方顯示
+        chgDay : function () {
+            $('.data-list ul.active').each(function () {
+                var chkdate = $(this).attr('data-day'),
+                    chkyear = chkdate.substr(0, 4),
+                    chkDay  = chkdate.substr(4, 2);
+                $('.dayNow .this-month').text(chkyear + '年' + ' ' + chkDay + '月')
+            });
+        },
+        // 上方點選下拉區塊-月曆內容點選
+        chk_Day : function () {
+            var _this = this;
+            // 月曆內點選日期時，判斷內容
+            $('.data-list ul li').on('click', function () {
+                // 點選到的日期
+                dayClass      = $(this).attr('class');
+                var chkToday  = $(this).hasClass('today'),
+                    month_day = dayClass.substr(0, 2);
+                g_day = month_day;
+    
+                $('.data-list ul li.active').removeClass('active');
+                // 若是點選到當日，就不加CLASS
+                if (!chkToday) { $(this).addClass('active'); }
+    
+                // 獲取選取的月份跟日期
+                $('.slidebox ul').remove();
+                catch_data_day = $(this).parent('ul').attr('data-day');
+                getMonth = catch_data_day;
+                g_Year  = getMonth.substr(0,4);
+                g_month = getMonth.substr(4,2);
+
+                // 點選時，判斷是在條列式還是便利貼，並重新載入資料
+                fn.re_load_fn();
+    
+                winLoad = true;   // 判斷為從新載入
+                slider_num = 0;   // 從上方下拉月曆選擇日期時，判斷變數重新變成1
+                
+                chkDate = String(g_Year + g_month + g_day);
+                reloadDay = String(g_Year + g_month);
+                ymd = chkDate;
+
+                _this.closeWin(); // 收起視窗             
+                _this.CalendFn();
+                _this.count_fn();
+            });
+            var dataWrap_h = $('.dateWrap').height(),
+                dataList_h = $('.data-list ul.active').height();
+                
+            $('.dayNow input[type="checkbox"]').on('click', function () {
+                var daychk = $(this).prop('checked');
+                if (daychk === false) {
+                    $('.top-monthBox').stop().animate({ 'top': -(dataWrap_h + dataList_h) });
+                    $('.calendar-page').stop().animate({ 'top': '30vmin'});
+    
+                } else {
+                    $('.top-monthBox').stop().animate({
+                        'top': '14vmin'
+                    }).css({                        
+                        'background': '#f1f1f1',
+                        'box-shadow': "0 3px 8px rgb(199, 199, 199)"
+                    });
+                    $('.calendar-page').stop().animate({'top': '80vmin'});
+                }
+            });
+        },
+        // 上方點選下拉區塊-收起視窗
+        closeWin : function () {
+            var dataWrap_h = $('.dateWrap').height(),
+                dataList_h = $('.data-list ul.active').height();
+            $('.top-monthBox').stop().animate({ 'top': -(dataWrap_h + dataList_h)})
+            $('.calendar-page').stop().animate({ 'top': '26.5vmin'});
+            $('.dayNow input[type="checkbox"]').prop('checked', false);
+        },
+        /*---- 上方週顯示 資料與滑動效果 ----*/
+        // 載入資料
+        CalendFn : function () {
+            var _day;
+            //判斷是否為第一次載入頁面
+            if (winLoad === false) {
+                reloadDay = yearDay;
+                get_day = $day;
+                
+            } else if (winLoad === true && !chkDate) {
+                reloadDay = catch_data_day;
+                get_day = dayClass.substr(0, 2);
+
+            }else if(winLoad === true && chkDate){
+                reloadDay = chkDate.substr(0, 6);
+                get_day = dayClass.substr(0, 2);
+            }
+
+            var slidebox_ul = $('<ul>').addClass('clearfix');
+            for(var i in dayObj){
+                if(i == reloadDay){
+                    var month = dayObj[i];
+                    for(var j in month){
+                        var day = month[j];
+                        var wk            = day.week,
+                            dt            = day.date,
+                            slidebox_week = $('<p>').addClass('week').text(wk),
+                            slidebox_data = $('<p>').addClass('date').text(dt),
+                            slidebox_li   = $('<li>').append(slidebox_week, slidebox_data).attr('data-day', dt);
+                        slidebox_ul.append(slidebox_li);
+                    }
+                } 
+            }
+            $('.slidebox').append(slidebox_ul);
+            $('.slidebox ul').attr('data-month',reloadDay);
+    
+            var c_slideBox   = $('.slidebox'),
+                c_selfLi     = c_slideBox.find('li'),
+                c_liWidth    = c_selfLi.outerWidth(),
+                c_liCount    = Math.ceil(c_selfLi.length),
+                
+                c_leftNum    = c_liWidth * 7,
+                c_slideWidth = c_liCount * c_liWidth;
+            
+            //給予slidebox總寬度
+            $('.slidebox').css({ 'width': c_slideWidth + 5 });
+    
+            /* -----------算當日是第幾週----------- */
+            function getweeknum2(get_day) { 
+                return Math.floor((get_day - 1) / 7); 
+            }
+            loadWeek_num = getweeknum2(get_day);
+            var total = c_leftNum * loadWeek_num;
+    
+            // 移動到第幾週
+            $('.slidewrap .slidebox').css({'left': '-' + total + 'px'});
+        
+            // 針對當天日期增加 Class
+            $('.slidebox ul li').each(function () {
+                var todayNum = $(this).attr('data-day');
+                var today    = String(get_day) ;
+                if(today === todayNum){
+                    $(this).addClass('active')
+                }
+            });
+
+            $('.slidebox ul li').on('click', function () {
+                slideChk = true;
+                getMonth = $(this).parent('ul').attr('data-month');
+                dayClass = $(this).attr('data-day');
+                g_day    = dayClass;
+                g_Year   = getMonth.substr(0,4);
+                g_month  = getMonth.substr(4,2);
+        
+                ymd = g_Year+g_month+g_day;
+                
+                $('.slidebox ul li.active').removeClass('active');
+                $(this).addClass('active');
+    
+                // 有觸發上方週滑動效過
+                slideMove = false;
+                // 點選時，判斷是在條列式還是便利貼，並重新載入資料
+                fn.re_load_fn();
+    
+                // 抓取當天日期curr_num的值 對應滑動效果 cal_block.cal_content
+                $.each(curr_numObj, function (idx, val) {
+                    if (idx === String(g_day)) {
+                        clickNum = curr_numObj[idx] + 1
+                    }
+                });
+
+                winLoad = true;
+                chkDate = g_Year+g_month+g_day;
+                _day = g_Year+g_month+g_day;
+                fn.wekTo_top(g_Year,g_month,g_day);
+            }); 
+        },
+        // 週點選日期時，上方月曆也跟著點選
+        wekTo_top: function(g_Year,g_month,g_day){
+            $('.data-list ul[data-day="'+ g_Year+g_month +'"] li').each(function(){
+                $(this).removeClass('active');
+                var _getClass = $(this).attr('class');
+                if( _getClass !== undefined ){     
+                    var _getday = _getClass.substr(0,2);  
+                    if( _getday === g_day ){ 
+                        $(this).addClass('active')
+                    }
+                }
+            });
+        },
+        // 判斷
+        count_fn : function(){
+            var loadDay;   //判斷是否為第一次載入頁面
+            if (winLoad === false) {
+                loadDay = $day;
+            } else if (winLoad === true) {
+                loadDay = dayClass.substr(0, 2);
+            }
+            function getweeknum1(loadDay) {
+                loadDay = parseInt(loadDay);
+                return Math.floor((loadDay - 1) / 7);
+            }
+            slider_num = parseInt(getweeknum1(loadDay));
+
+            var slideBox = $('.slidebox');
+            speed      = 500,
+            selfLi     = slideBox.find('li'),
+            liWidth    = selfLi.outerWidth(),
+            liCount    = Math.ceil(selfLi.length),
+            slideWidth = liCount * liWidth,
+            $group     = $('.slidebox').find('li').innerWidth() * 7,
+            $total     = Math.ceil(liCount / 7)-1,
+            liLeft     = $group * $total;
+        },
+        // 上方週顯示滑動效果
+        sb_content : function () {
+            var slideBox   = $('.slidebox');
+            /*-- 滑動效果 --*/
+            $('.slidebox').touchwipe({
+                wipeLeft: function() { 
+                    if (slider_num === $total) {
+                        return
+                    } else if (slider_num < $total) {
+                        slider_num++;
+                        slideBox.not(':animated').animate({'left': '-=' + $group}, speed);
+                    }
+                },
+                wipeRight: function() { 
+                    if (slider_num === 0) {
+                        return;
+                    } else if (slider_num <= $total) {
+                        slider_num--;
+                        slideBox.not(':animated').animate({'left': '+=' + $group }, speed);
+                    }
+                },
+                min_move_x: 20,
+                min_move_y: 20,
+                preventDefaultEvents: false
+            });
+        },
+        
+        //日顯示內容
+        /*-----  stickyFn   -----*/
+        add_goPage: function (page,id_schedule) {
+            pageHistory.push(page)
+            $.post(burl + 'main/ToView/' +page, {id_schedule}, function (pg) {
+                $('.page').html(pg);
+                $('footer,.calendar-box,.slideNav').hide();
+            });
+        },
+        // 便條紙資料
+        sky_date: function (ymd) {
+            var _this = this;
+            var $skNote;
+            var sech = fn.sch_Date;
+            var sech_len = sech.length;
+            // 帶當天資料
+            if( sech && sech !== "null" && sech !== "undefined" && sech_len > 0){
+                for (var k in sech) {                              
+                    var sechList = sech[k]
+                    var span_icon        = $('<span>').addClass('icon-loction');
+                    var span_room        = $('<span class="trip-room">').text(sechList.location);
+                    //var span_reply       = $('<span class="trip-reply">').text(sechList.reply + '則回覆'),
+                    var span_reply       = $('<span class="trip-reply">').text(),
+                    //    p_trip_loaction  = $('<p class="trip-loaction">').append(span_icon,span_room, span_reply),
+                        p_trip_loaction  = $('<p class="trip-loaction">').append(span_icon,span_room),
+                        p_trip_theme     = $('<p class="trip-theme">').text(sechList.title),
+                        p_trip_time      = $('<p class="trip-time">').text(sechList.s_time + ' - ' +sechList.e_time),
+                        // 外層div
+                        div_trip_content = $('<div class="trip-content">').append(p_trip_time,p_trip_theme, p_trip_loaction),
+                        div_trip_type    = $('<div class="trip-type">').text(sechList.typeName).addClass(sechList.classType),
+                        div_left_line    = $('<div class="left-line">').addClass(sechList.classType),
+                        div_sticky_wrap;
+                        
+                    div_sticky_wrap = $('<div class="sticky-style-wrap">')
+                                            .append(div_left_line, div_trip_type, div_trip_content);
+                    //gotop 置頂, hasRead 已讀, isCancel取消
+                    var $gotop    = sechList.top,
+                        $hasRead  = sechList.read_status, 
+                        $isCancel = sechList.status;
+                    
+                    //判斷行程是否有閱讀過 hasRead
+                    if($hasRead === "0"){ //未讀
+                        div_trip_type.addClass('has-read');
+                    }else if($hasRead === "1"){
+                        div_trip_type.removeClass('has-read');
+                    }
+
+                    //判斷行程是否被取消
+                    if ($isCancel === "1") {
+                        div_sticky_wrap.addClass('icon-embar').attr('data-id', 'cancel');
+                    }
+                    
+                    if( sechList.classType == 'leave' ){
+                        $skNote = $('<div class="sticky-note leacve-Type">')
+                                    .append(div_sticky_wrap)
+                                    .attr('id-schedule',sechList.id);
+                        div_sticky_wrap.attr('data-id',sechList.classType);
+                    
+                    }else{
+                        $skNote = $('<div class="sticky-note">')
+                                    .append(div_sticky_wrap)
+                                    .attr('id-schedule',sechList.id);
+                    }
+
+                    if ($gotop === "1") {
+                        $('.trip-content').addClass('icon-top');
+                    }                
+                    
+                    $('.cal-block').append($skNote);
+                }
+
+                //判斷是否同時有置頂跟取消
+                $('.sticky-note .sticky-style-wrap .trip-content').each(function(){
+                    var hasCs = $(this).hasClass('icon-top');
+                    var hasTop = $(this).parent().hasClass('icon-embar');
+                    if( hasCs == true && hasTop == true ){
+                        $(this).parent().css({'background': 'rgba(211, 211, 211,.7)'});
+                    }else if(hasCs == true && hasTop == false){
+                        $(this).parent().css({'background': '#eefefe'});
+                    }else if(hasCs == false && hasTop == true){
+                        $(this).parent().css({'background': 'rgba(211, 211, 211,.7)'});
+                    }
+                });
+                
+                fn.delayTime();
+            }else{
+                $('.cal-block div').remove();
+                $('.cal-block').append('<div class="no-date">尚未有任何行程</div>');
+                _this.calendar_page_h(false);
+            }
+
+            $('.calendar-page').scrollTop(0);
+            // 請假樣式
+            $('.leacve-Type .trip-loaction').hide();
+            //點選行程
+            $('.cal-block .sticky-note').on('click', function () {
+                var get_id   = $(this).attr('id-schedule'),
+                    chkCa    = $(this).children().attr('data-id'),
+                    re_class = $(this).children().children().hasClass('has-read');
+                    
+                // 取消與請假不用進到page
+                if( chkCa == 'cancel'){  return;  }
+                id_num = get_id;
+                page = 'page';
+                _this.add_goPage(page,id_num);
+            });  
+            
+        },
+        delayTime: function(){
+            setTimeout(function(){
+                fn.calendar_page_h(true);
+                $('.calendar-page').scrollTop(0);
+            },300);
+        },
+        // 條列式資料
+        at_date: function (ymd) {
+            var _this = this;
+            var go_TopDiv = [];
+            var at_ul     = $('<ul>')
+            var $artNote  = $('<div class="article-note">')
+            var sech = fn.sch_Date;
+            var sech_len = sech.length;
+            // 帶當天資料
+            if( sech && sech !== "null" && sech !== "undefined" && sech_len > 0){
+                for (var k in sech) {
+                    var sechList = sech[k];
+                    var article_read   = $('<span class="article-read">'),
+                        at_icon_span01 = $('<span class="path1">'),
+                        at_icon_span02 = $('<span class="path2">'),
+                        // article-right > p
+                        at_p_type      = $('<p class="article-type">').text(sechList.typeName).addClass(sechList.classType),
+                        at_p_theme     = $('<p class="article-theme">').text(sechList.title),
+                        // at_icon_circle = $('<p class="icon-circle">').append(at_icon_span01,at_icon_span02),
+                        at_icon_circle = $('<p class="i-circle">'),
+                        at_p_time      = $('<p class="time">').text(sechList.s_time),
+                        // time-point > div
+                        at_div_content = $('<div class="article-content">').append(at_p_type,at_p_theme),
+                        at_div_right   = $('<div class="article-right">').append(at_icon_circle,at_div_content),
+                        at_div_left    = $('<div class="article-left">').append(at_p_time),
+                        // article-time-top > ul > li
+                        at_li          = $('<li class="time-point article-time">').append(at_div_left,at_div_right).attr('id-schedule',sechList.id);
+
+                    //gotop 置頂, hasRead 已讀, isCancel取消
+                    var $gotop = sechList.top,
+                        $hasRead = sechList.read_status,
+                        $isCancel = sechList.status;
+
+                    // 判斷是否置頂
+                    if ($gotop == "1") {
+                        at_div_right.addClass('icon-top');
+                        
+                    } else if ($gotop == "0") {
+                        at_div_right.removeClass('icon-top');
+                    }
+                    // 判斷行程是否有閱讀過 hasRead
+                    if ($hasRead == "0") {
+                        at_icon_circle.css({
+                            "background": "#e30214",
+                            "border": "none"
+                        });
+                        // at_div_right.append(article_read);
+                    } else if($hasRead == "1"){
+                        // at_div_right.append('');
+                        at_icon_circle.css({
+                            "background": "#fff",
+                            "border": "0.5vmin solid #ccc"
+                        });
+                    }
+
+                    // 判斷行程是否被取消
+                    if ($isCancel == "1") {
+                        at_div_content.addClass('icon-embar').attr('data-id', 'cancel');
+                        
+                    } else if ($isCancel == "0"){
+                        at_div_content.removeClass('icon-embar');
+                    }
+                    // 判斷是否置頂,並修改bgcolor
+                    _this.judg_top_article();
+
+                    if( sechList.classType == 'leave' ){
+                        $('<div class="article-content">').attr('data-id', 'leave');
+                    }
+
+                    var allUL = at_ul.append(at_li)
+                    var div_artNote = $artNote.append(allUL)
+                    $('.cal-block').append(div_artNote);
+                }
+                fn.delayTime();
+            } else {
+                $('.cal-block').append('<div class="no-date">尚未有任何行程</div>');
+            }
+               
+            $('.article-note li div.icon-top').last().parent().addClass('dotted_line');
+        
+            // 點選進入內容
+            $('.article-content').on('click',function(){
+                var get_id = $(this).parent().parent().attr('id-schedule'),
+                    chkCa  = $(this).attr('data-id');
+                // 移除紅點    
+                $(this).next('span').remove();
+                if( chkCa == 'cancel' || chkCa == 'leave'){ return; }
+                id_num = get_id;
+                page = 'page';
+                _this.add_goPage(page,id_num);
+            });
+        },
+        // 日顯示 - 條列
+        judg_top_article: function () {
+            var articleRight = $('.article-right'),
+                has_class = $('.article-right .icon-top'),
+                judg_class = articleRight.hasClass('icon-top');
+            if (judg_class === true) {
+                has_class.css({'background': ' #eefefe'});
+            } else {
+                has_class.css({'background': ' #fff'});
+            } 
+        },
+        
+        // 內容滑動效果
+        /*----- cal_block_fn  -----*/
+        // 抓取點選的值
+        cal_lieach: function () {
+            $('.slidebox ul li.active').each(function () {
+                $(this).removeClass('active');
+                if (cur_next === true) {
+                    $(this).next().addClass('active');
+                } else if (cur_next === false) {
+                    $(this).prev().addClass('active');
+                }
+            });
+        },
+        // 計算下一天
+        movePlus: function () {
+            var _this = this;
+            $('.slidebox ul li.active').each(function (idx, val) {
+                var dateNum = $(this).find('p.date').text();
+                var mv_ym   = $(this).parent('ul').attr('data-month');
+                mv_year   = mv_ym.substr(0, 4);
+                mv_month  = mv_ym.substr(4, 2);
+                t_dateNum = parseInt(dateNum) + 1;
+                t_dateNum = String(t_dateNum);
+                if (t_dateNum <= 9) { t_dateNum = '0' + t_dateNum; }
+                _this.re_load_touchMove(t_dateNum);
+            });
+            nextYmd = true;
+            _this.cal_lieach();
+        },
+        // 計算前一天
+        moveLess: function () {
+            var _this = this;
+            $('.slidebox ul li.active').each(function (idx, val) {
+                var dateNum = $(this).find('p.date').text();
+                var mv_ym = $(this).parent('ul').attr('data-month');
+                mv_year = mv_ym.substr(0, 4);
+                mv_month = mv_ym.substr(4, 2);
+                t_dateNum = parseInt(dateNum) - 1;
+                t_dateNum = String(t_dateNum);
+                if (t_dateNum <= 9) { t_dateNum = '0' + t_dateNum; }
+    
+                _this.re_load_touchMove(t_dateNum);
+            });
+            nextYmd = false;
+            _this.cal_lieach();
+        },
+        //內容滑動換置
+        cal_content: function () {
+            var _this = this;
+            var w = $(window).width();
+            // 內容滑動
+            $(".calendar-page").on("touchstart", function (e) {
+                startX = e.originalEvent.changedTouches[0].pageX;
+                startY = e.originalEvent.changedTouches[0].pageY;
+            });
+            $(".calendar-page").on("touchend", function (e) {
+                moveEndX = e.originalEvent.changedTouches[0].pageX;
+                moveEndY = e.originalEvent.changedTouches[0].pageY;
+                X = moveEndX - startX;
+                Y = moveEndY - startY;
+                
+                //向右滑
+                if(moveEndX > startX && moveEndX - startX > w/5){
+                    var mcr;
+                    $('.slidebox ul li.active').each(function (idx, val) {
+                        mcr = $(this).attr('data-day');
+                    });
+                    function moveR_Fn(mcr) {
+                        if (mcr == '01' || mcr == '08' || mcr == '15' || mcr == '22' || mcr == '29') {
+                            return;
+                        } else {
+                            cur_next = false;
+                            _this.moveLess();
+                        }
+                    }
+                    if (slideMove === true) {
+                        return;
+                    } else {
+                        moveR_Fn(mcr);
+                    }
+                //向左滑
+                }else if(moveEndX < startX && startX - moveEndX > w/5){
+                    var mcf;
+                    $('.slidebox ul li.active').each(function (idx, val) {
+                        mcf = $(this).attr('data-day');
+                    });
+                    //滑動一次，就要抓到下一段的第一個
+                    function moveL_Fn(mcf) {
+                        if (mcf === "07" || mcf === "14" || mcf === "21" || mcf === "28" || mcf ==="31") {
+                            return;
+                        }else{
+                            cur_next = true;
+                            _this.movePlus();
+                        }
+                    }
+                    if (slideMove === true) {
+                        return;
+                    } else {
+                        moveL_Fn(mcf);
+                    }
+                }
+            });
+        },
+        // 內容滑動時，判斷是在條列式還是便利貼，並重新載入資料
+        re_load_touchMove: function(t_dateNum){
+            var _this = this,
+                ymd = String(mv_year + mv_month + t_dateNum);
+                ymd = ymd;
+                nextYmd = false;
+                _this.load_data_type(ymd,s_type); //篩選行程類別
+        },
+        // 點選時，判斷是在條列式還是便利貼，並重新載入資料
+        re_load_fn: function(){
+            var _this = this,
+                ymd = g_Year + g_month + g_day;
+                nextYmd = false;
+                _this.load_data_type(ymd,s_type); //篩選行程類別
+        },
+
+        //calendar-page高度
+        /*----- pageCalFn  -----*/
+        calendar_page_h: function (j) {
+            var win_h       = $(window).height(),
+                topMenu_h   = $('.top-menu').outerHeight(),
+                slideweek_h = $('.slideweek').outerHeight(),
+                footer_h    = $('footer').outerHeight(),
+                caPageTop_h = topMenu_h + slideweek_h,
+                caPage_h    = win_h - topMenu_h - slideweek_h - footer_h;
+            
+            // 判斷載入資料，有無內容，再給予相對應的高度
+            if(j){
+                $('.calendar-page').removeAttr('style').css({'top': caPageTop_h, 'height': caPage_h + 5 });
+            }else{
+                $('.calendar-page').removeAttr('style').css({'top': caPageTop_h, 'height': caPage_h, 'padding-bottom':0 });
+            }  
+        },
+        ca_pageTop: function () {
+            var $None = $('.article-type').hasClass('none');
+            if ($None === false) {
+                $('.calendar-page').css({ 'padding-top': 0});
+            }
+        },
+
+        /*-----  footerFn -----*/
+        // 動態消息
+        inforIcon: function(){
+            inforNum = '50';
+            var html_div = $('<div>').addClass('infor-num').text(inforNum);
+            if( hasInfor === true ){
+                $('.inforbtn').append(html_div);
+            }
+        },
+        //日選單條件hide
+        calendar_box_hide: function(){
+            slideBg.fadeOut();
+            $('.calendar-box').stop().animate({ 'bottom': '-48vmin' },700,'swing');
+            clearInterval(times);
+        },
+        //日選單條件切換
+        btnCalender: function(){
+            var _this = this;
+            calendarLi.on('click',function(){
+                var ca_btn    = $(this).attr('class'),
+                    btnStatus = $(this).hasClass('active');
+                    
+                // 切換顯示模式
+                if( ca_btn == 'note-show'){
+                    noteType = true;
+                    // 日顯示轉換判斷  
+                    chgType = 0;              
+                }else if( ca_btn == 'article-show'){
+                    noteType = false;
+                    // 日顯示轉換判斷
+                    chgType = 1;
+                }
+                _this.load_data_type(ymd,s_type)
+
+                // 樣式轉換
+                $(this).each(function(){
+                    if( calendarLi.hasClass('active') ){
+                        calendarLi.removeClass('active') 
+                    }  
+                    if( btnStatus === true){
+                        $(this).addClass('active');
+                        times = setInterval(_this.calendar_box_hide);
+                    }else{
+                        $(this).addClass('active');
+                        times = setInterval(_this.calendar_box_hide);
+                    }  
+                });
+            });
+        },
+        /*-----  側邊選單 -----*/
+        classify_List: function(){
+            var num = 0;
+            // 判斷 如果選了某個item 切換其他page 都keep住
+            if(!s_type.length){
+                s_type = ["4","7","11","15"]; //預設先給四個值
+            }
+            for(var i in typeList){
+                var item = typeList[i];
+                num ++ ;
+                var _input = $('<input type="checkbox">').addClass(item.Classtype).attr({'id':'a'+ num,'data_id':item.id}),
+                    _label = $('<label for="a'+ num +'">'),
+                    _span  = $('<span>').text(item.name),
+                    _div   = $('<div>');
+
+                var items = $('<div/>').addClass('slideNav-items'),
+                    _label = $('<label/>').addClass(item.Classtype),
+                    _input = $('<input/>').attr({"type":"checkbox","id":"a"+ num,"data_id":item.id}).addClass(item.Classtype);
+                    _txt = $("<span/>").html(item.name);
+                    
+                _label.append(_input,_txt);
+                items.append(_label) 
+                $('.slide-nav .slideNav-content form').append(items);      
+            }
+            $('.slide-nav .slideNav-content form').scrollTop(0)
+        },
+        menu_out: function(){
+            $('.slide-nav-bg').fadeIn();
+            $('.slide-nav').stop().animate({ 'left': 0 },500,'swing');
+            $('#s_type input[type="checkbox"]').prop('checked',false);
+            $.each(s_type,function(index,item){
+                $('#s_type input[data_id="'+item+'"]').prop('checked',true);
+            });
+            $('.calendar-page').css({'overflow': "hidden"});
+        },
+        //隱藏
+        menu_in: function(){
+            $('.slide-nav-bg').fadeOut();
+            $('.slide-nav').stop().animate({ 'left': '-75vmin' },500,'swing');
+            $('#s_type input[type="checkbox"]').prop('checked',false);
+            $.each(s_type,function(index,item){
+                $('#s_type input[data_id="'+item+'"]').prop('checked',true);
+            });
+        },
+        //把選中的值 傳入array
+        get_input: function(){
+            s_type = [];
+            $('.slideNav-content input[type="checkbox"]:checked').each(function(){
+                var _id    = $(this).attr('data_id');
+                var _class = $(this).attr('class');
+                var _text  = $(this).next().next().text();
+                s_type.push(_id);
+                //fn.s_type.push(_id);
+            });
+            // fn.sliderBtn(s_type);
+        },
+        sliderBtn: function(){
+            var _this = this;
+            $('.slide-nav-btn .confirm').on('click',function(e){
+                var sum = 0
+                $('.slideNav-content input[type="checkbox"]:checked').each(function(){
+                    sum+=1
+                });
+                if(sum === 0){
+                    alert('至少須選擇一個分類');
+                    e.preventDefault();
+                }else{
+                    _this.get_input();
+                    _this.load_data_type(ymd,s_type); //篩選行程類別
+                    _this.menu_in(); 
+                }
+            });
+            $('.slide-nav-btn .cancel').on('click',function(){
+                _this.menu_in();
+            });
+            $('.top-menu .menu').on('click',function(){
+                _this.menu_out();
+            });
+        },
+        //click-全選或是全不選 按鈕時
+        chkBtn: function(){ 
+            $('.slideNav-top-btn').on('click','button',function(){
+                $('.slideNav-top-btn').children('button').removeClass('active');
+
+                var slideInput   = $('.slideNav-content input[type="checkbox"]'),
+                    btnSelect    = $(this).attr('class'),
+                    btnSelect_ac = $(this).hasClass('active');
+                
+                if( btnSelect === 'select-all'){       
+                    $(this).addClass('active');
+                    $('.slideNav-content input[type="checkbox"]').prop('checked',true);
+                }else if( btnSelect === 'unselect-all'){  
+                    $(this).addClass('active');
+                    $('.slideNav-content input[type="checkbox"]').prop('checked',false);
+                    $('.slideNav-content input[type="checkbox"].meeting').prop('checked',true);
+                    $('.slideNav-content input[type="checkbox"].activity').prop('checked',true);
+                    $('.slideNav-content input[type="checkbox"].leave').prop('checked',true);
+                    $('.slideNav-content input[type="checkbox"].other').prop('checked',true);
+                }
+            });
+        },
+        classify_height: function(){
+            var win_h = $(window).height();
+            var slide_nav_h    = $('.slide-nav').height(),
+                slideNav_top_h = $('.slideNav-top').height(),
+                nav_btn_h      = $('.slide-nav-btn').height(),
+                Sn_height      = slide_nav_h - slideNav_top_h - nav_btn_h;
+            $('.slideNav-content').css({
+                'margin-top':slideNav_top_h,
+                'padding-bottom': Math.ceil(nav_btn_h),
+                'height': Math.ceil(win_h) - Math.ceil(slideNav_top_h)
+            });
+            $('.slide-nav,.container').height(win_h);
+        },
+        topBtn: function(){
+            $('.change-mode button').on('click',function(){
+                var chkClass = $(this).attr('class');
+                $('.change-mode button').removeClass('active');
+                $(this).addClass('active');
+            });
+        },
+        //抓當周行程
+        load_data:  function(ymd){
+            if(ymd === undefined){
+                ymd = $year+$month+$day;
+            }
+            
+            sendfun.post(burl+"pre_schedule/"+ymd,'',{
+                onSuccess : function(res){
+                    if(res.code === '100'){
+                        fn.sch_Date = res.sch_Date;
+                        $('.cal-block div').remove(); //移除行程
+
+                        if (noteType === true) {
+                            fn.sky_date(ymd);
+                            $('.calendar-page').scrollTop(0);
+                        } else if(noteType === false)  {
+                            fn.at_date(ymd);
+                            $('.calendar-page').scrollTop(0);
+                        }
+                    }else{
+                        console.log('err');
+                    }                    
+                },
+                onFail: function(res){
+                    popup.alert("讀取行程失敗,請重試", res.msg || false, function(){
+                        window.location.reload();
+                    });
+                }
+            });   
+        },
+        //依照行程類別篩選
+        load_data_type:  function(ymd,s_type){
+            if(ymd == undefined){
+                ymd = $year + $month + $day;
+            }
+            if(!s_type.length){
+                stype = ["4","7","11","15"]; //預設先給四個值
+                stype = stype.toString();
+            }else{
+                stype = s_type.toString();
+            }
+            sendfun.post(burl+"pre_schedule_type/"+ymd,{stype},{
+                onSuccess : function(res){
+                    if(res.code === '100'){
+                        fn.sch_Date = res.sch_Date;
+                        $('.cal-block div').remove(); //移除行程
+                        if (noteType === true) {                            
+                            fn.sky_date(ymd);
+                            $('.calendar-page').scrollTop(0);
+                        } else if(noteType === false)  {
+                            fn.at_date(ymd);
+                            $('.calendar-page').scrollTop(0);
+                        }
+                    }else{
+                        console.log('err');
+                    }                 
+                },
+                onFail: function(res){
+                    popup.alert("讀取行程失敗,請重試", res.msg || false, function(){
+                        window.location.reload();
+                    });
+                }
+            });   
+        }
+    }
+    fn.init();
+    return fn;
+}
+var monthBlock_Fn = new month_block();
+
+</script>

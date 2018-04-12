@@ -1,0 +1,172 @@
+<header class="chatroom-header">
+    <!-- 上方選單 -->
+    <div class="top-menu clearfix">
+        <div class="chatroom-back icon-arrow"></div>
+        <div class="chatroom-title">對話紀錄</div>
+        <!-- <div class="chatroom-close icon-close"></div> -->
+    </div>
+</header>
+<div class="chatroom-page">
+    <div class="dialogue-wrap">
+        <ul>
+            <!-- 對話內容 -->
+        </ul>
+    </div>
+    <div class="input-box-wrap">
+        <div class="input-box">
+            <form id="msg_form"> 
+                <input type="text" class="respond" placeholder="請在此輸入回應" value="">
+                <button type="button" class="icon-enter" data-id="enterBtn"></button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+var chatroomFn = function(){
+    var fn ={        
+        s_id: '{id_schedule}',
+        msg: '',
+        data_msg: null,
+        add_goPage:  function (page,id_schedule) {
+            //更改通知閱讀狀態
+            $.post(burl + 'main/ToView/' +page, {'id_schedule':fn.s_id}, function (pg) {
+                $('.page').html(pg);
+            });
+        },
+        dialogueList: function(msg){
+            $('.dialogue-wrap ul').html('');
+            if(msg.length >0 && msg !== "undefined"){
+                for(var k in msg){
+                        m_data = msg[k];
+                        
+                    var html_li = 
+                                '<li msg-id= '+m_data.id+'>\
+                                    <div class="dialogue-top clearfix">\
+                                        <p class="dialogue-name">'+ m_data.name +'</p>\
+                                        <p class="dialogue-day">'+ m_data.day +'</p>\
+                                        <p class="dialogue-time">'+ m_data.time +'</p>\
+                                    </div>\
+                                    <div class="dialogue-btm">'+ m_data.msg +'</div>\
+                                </li>';
+
+                        $('.dialogue-wrap ul').append(html_li);        
+                }
+
+            }else{
+                var html_li = 
+                '<li>\
+                    <div class="dialogue-top clearfix">\
+                        <p class="dialogue-name">目前尚無留言</p>\
+                    </div>\
+                    <div class="dialogue-btm"></div>\
+                </li>';
+                $('.dialogue-wrap ul').append(html_li);
+            }
+            fn.re_size();
+        },
+        re_size:  function(){
+            var $crPage = $('.chatroom-page'),
+                $height = $(window).height(),
+                $header = Math.ceil($('.top-menu').innerHeight()),
+                $inputBox = Math.ceil($('.input-box-wrap').innerHeight()),
+                pageHeight = Math.ceil( $height  - $inputBox );
+            var d_wrap = $('.dialogue-wrap'),
+                d_wrap_height = d_wrap.outerHeight();
+            
+            d_wrap.css({'max-height': $height - $header,'height': $height - $header,'padding-bottom': $inputBox});
+            d_wrap.animate({
+                'scrollTop':d_wrap_height+999
+            },0);
+            
+        },
+        send_msg: function(){
+            $('.icon-enter').on('click',function(){
+                var msg = $('.respond').val()  
+                if(msg === ''){
+                    return false;
+                } 
+                //儲存訊息到後端
+                sendfun.post(burl + 'save_msg', {'id_schedule':fn.s_id,'msg':msg}, {
+                    onSuccess: function(res){
+                        if(res.code === '100'){                                  
+                                
+                                $('.respond').val('');
+                                //重新 append 內容
+                                fn.load_msg();
+                            
+                        }else{
+                            popup.alert('輸入錯誤', res.msg || false);
+                        }
+                    },
+                    onFail: function(res){
+                        popup.alert('輸入錯誤', res.msg || false);
+                    }
+                });
+           });     
+        },
+        msg_loop: function(){
+            fn.data_msg = setTimeout(fn.load_msg, 30000);
+        },
+        change_read_msg: function(){
+                sendfun.post(burl + 'read_msg', {'id_schedule':fn.s_id}, {
+                    onSuccess: function(res){
+                        if(res.code === '100'){                                  
+                            //console.log('read_msg',res);
+                        }
+                    },
+                    onFail: function(res){
+                        popup.alert('read_msg錯誤', res.msg || false);
+                    }
+                });
+        },
+        load_msg: function(){
+            clearTimeout(fn.data_msg);
+            sendfun.post(burl + 'get_msg/'+fn.s_id, '', {
+                onSuccess: function(res){
+                    if(res.code === '100'){
+                            fn.msg = res.msg;                      
+                            fn.dialogueList(fn.msg);
+                    }
+                },
+                onFail: function(res){
+                    popup.alert('載入訊息錯誤', res.msg || false);
+                },
+                onComplete: function(){
+                    fn.msg_loop();
+                }
+            });
+        },
+        aaa: function(){
+                var $crPage = $('.chatroom-page'),
+                $height = $(window).height();
+                $crPage.css({'height': $height/2});
+                $('.page').scrollTop(0);
+        },
+        init : function(){
+            this.re_size();
+            this.send_msg();
+            this.load_msg();
+            this.change_read_msg();
+            $('input[type="text"]').change(function(){
+                fn.re_size();
+            });
+            $('input[type="text"]').blur(function(){
+                fn.re_size();
+            });
+            // $(window).resize(function(){
+            //     fn.re_size();
+            // });
+            $('.chatroom-back,.chatroom-close').on('click',function(){
+                clearTimeout(fn.data_msg);
+                fn.add_goPage('page',fn.s_id); 
+
+            });
+        }
+    }
+    fn.init();
+    return fn;
+}
+var Chatroom = new chatroomFn();
+</script>
+<!-- </html> -->
